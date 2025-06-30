@@ -151,10 +151,20 @@
       align-items: center;
     }
 
-    .file-list a::before {
-      content: '📄';
-      margin-right: 0.75rem;
-      font-size: 1.25rem;
+    .file-list img.thumbnail {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+    }
+
+    .file-list .icon {
+      font-size: 30px;
+      margin-right: 10px;
+      width: 40px;
+      text-align: center;
     }
 
     .empty-state {
@@ -311,6 +321,49 @@
       xhr.send(formData);
     }
 
+    function createFileElement(file) {
+      const ext = file.filename.split(".").pop().toLowerCase();
+      const a = document.createElement("a");
+      a.href = file.path;
+      a.target = "_blank";
+      a.textContent = file.filename;
+      a.style.display = "flex";
+      a.style.alignItems = "center";
+
+      // Create thumbnail or icon span
+      if (["jpg", "jpeg", "png", "gif", "webp", "bmp"].includes(ext)) {
+        const img = document.createElement("img");
+        img.src = file.path;
+        img.alt = file.filename;
+        img.className = "thumbnail";
+        a.prepend(img);
+      } else if (["mp4", "mkv", "avi", "mov", "webm"].includes(ext)) {
+        const icon = document.createElement("span");
+        icon.className = "icon";
+        icon.textContent = "🎬";
+        a.prepend(icon);
+      } else if (["mp3", "wav", "ogg", "m4a"].includes(ext)) {
+        const icon = document.createElement("span");
+        icon.className = "icon";
+        icon.textContent = "🎵";
+        a.prepend(icon);
+      } else if (["pdf", "doc", "docx", "txt", "ppt", "pptx", "xls", "xlsx"].includes(ext)) {
+        const icon = document.createElement("span");
+        icon.className = "icon";
+        icon.textContent = "📄";
+        a.prepend(icon);
+      } else {
+        const icon = document.createElement("span");
+        icon.className = "icon";
+        icon.textContent = "📁";
+        a.prepend(icon);
+      }
+
+      const li = document.createElement("li");
+      li.appendChild(a);
+      return li;
+    }
+
     function fetchFiles() {
       fetch("/data")
         .then(res => res.json())
@@ -320,12 +373,14 @@
           const docList = document.getElementById("docList");
           const musicList = document.getElementById("musicList");
 
-          imageList.innerHTML = videoList.innerHTML = docList.innerHTML = musicList.innerHTML = "";
+          imageList.innerHTML = "";
+          videoList.innerHTML = "";
+          docList.innerHTML = "";
+          musicList.innerHTML = "";
 
           data.forEach(file => {
             const ext = file.filename.split(".").pop().toLowerCase();
-            const li = document.createElement("li");
-            li.innerHTML = `<a href="${file.path}" target="_blank"><span>${file.filename}</span></a>`;
+            const li = createFileElement(file);
 
             if (["jpg", "jpeg", "png", "gif", "webp", "bmp"].includes(ext)) {
               imageList.appendChild(li);
@@ -336,7 +391,7 @@
             } else if (["pdf", "doc", "docx", "txt", "ppt", "pptx", "xls", "xlsx"].includes(ext)) {
               docList.appendChild(li);
             } else {
-              docList.appendChild(li); // fallback
+              docList.appendChild(li);
             }
           });
         });
