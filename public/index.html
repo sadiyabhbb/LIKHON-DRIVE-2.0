@@ -49,10 +49,30 @@
     const status = document.getElementById('status');
     const fileList = document.getElementById('fileList');
 
+    // ✅ Show all uploaded files on load
+    async function loadUploadedFiles() {
+      try {
+        const res = await fetch('/files');
+        const files = await res.json();
+        fileList.innerHTML = '';
+        files.reverse().forEach(file => {
+          const link = document.createElement('a');
+          link.href = file.url;
+          link.target = '_blank';
+          link.textContent = file.url;
+          fileList.appendChild(link);
+          fileList.appendChild(document.createElement('br'));
+        });
+      } catch (e) {
+        console.error('❌ Failed to load files');
+      }
+    }
+
+    loadUploadedFiles(); // Load on page load
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
-
       status.innerHTML = '⏳ Uploading...';
 
       try {
@@ -64,11 +84,8 @@
 
         if (data.url) {
           status.innerHTML = '✅ File uploaded successfully!';
-          const link = document.createElement('a');
-          link.href = data.url;
-          link.target = '_blank';
-          link.textContent = data.url;
-          fileList.prepend(link, document.createElement('br'));
+          form.reset();
+          await loadUploadedFiles(); // Reload list
         } else {
           status.innerHTML = '❌ Upload failed';
         }
@@ -76,8 +93,6 @@
         status.innerHTML = '❌ Error uploading file';
         console.error(err);
       }
-
-      form.reset();
     });
   </script>
 
