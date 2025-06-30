@@ -1,51 +1,85 @@
-<script>
-  const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
-
-  async function loadUploadedFiles() {
-    try {
-      const res = await fetch(`${BACKUP_SERVER}/files`);
-      const files = await res.json();
-      const fileList = document.getElementById('fileList');
-      fileList.innerHTML = '';
-
-      files.reverse().forEach(file => {
-        const link = document.createElement('a');
-        link.href = file.url;
-        link.target = '_blank';
-        link.textContent = file.url;
-        fileList.appendChild(link);
-        fileList.appendChild(document.createElement('br'));
-      });
-    } catch (e) {
-      console.error('❌ Failed to load files:', e);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🚀 Unlimited Drive Upload</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
     }
-  }
+    h1 {
+      color: #3f37c9;
+    }
+    #fileList a {
+      display: block;
+      color: blue;
+      text-decoration: underline;
+      margin: 5px 0;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 Unlimited Drive Upload</h1>
 
-  document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(document.getElementById('uploadForm'));
-    const status = document.getElementById('status');
-    status.innerHTML = '⏳ Uploading...';
+  <form id="uploadForm">
+    <input type="file" name="file" required />
+    <button type="submit">Upload</button>
+  </form>
 
-    try {
-      const res = await fetch(`${BACKUP_SERVER}/upload`, {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
+  <p id="status"></p>
 
-      if (data.url) {
-        status.innerHTML = '✅ File uploaded successfully!';
-        document.getElementById('uploadForm').reset();
-        await loadUploadedFiles();
-      } else {
-        status.innerHTML = '❌ Upload failed';
+  <h2>📁 Uploaded Files</h2>
+  <div id="fileList"></div>
+
+  <script>
+    const BACKUP_SERVER = 'https://drive-main-storage.onrender.com'; // Change if needed
+
+    async function loadFiles() {
+      try {
+        const res = await fetch(`${BACKUP_SERVER}/files`);
+        const files = await res.json();
+        const list = document.getElementById('fileList');
+        list.innerHTML = '';
+
+        files.reverse().forEach(file => {
+          const a = document.createElement('a');
+          a.href = file.url;
+          a.target = '_blank';
+          a.textContent = file.url;
+          list.appendChild(a);
+        });
+      } catch (err) {
+        document.getElementById('fileList').innerHTML = '❌ Failed to load files.';
       }
-    } catch (err) {
-      status.innerHTML = '❌ Error uploading file';
-      console.error(err);
     }
-  });
 
-  loadUploadedFiles();
-</script>
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      document.getElementById('status').textContent = 'Uploading...';
+
+      try {
+        const res = await fetch(`${BACKUP_SERVER}/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.url) {
+          document.getElementById('status').textContent = '✅ Uploaded!';
+          await loadFiles();
+        } else {
+          document.getElementById('status').textContent = '❌ Upload failed!';
+        }
+      } catch (err) {
+        document.getElementById('status').textContent = '❌ Upload error!';
+      }
+    });
+
+    loadFiles();
+  </script>
+</body>
+</html>
