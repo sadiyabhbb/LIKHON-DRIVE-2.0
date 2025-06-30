@@ -2,29 +2,318 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Unlimited Drive</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unlimited Drive | Secure File Storage</title>
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --secondary: #3f37c9;
+      --dark: #1b263b;
+      --light: #f8f9fa;
+      --success: #4cc9f0;
+      --danger: #f72585;
+      --border-radius: 8px;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f5f7fa;
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+    }
+
+    h2, h3 {
+      color: var(--secondary);
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    h2::after {
+      content: '';
+      display: block;
+      width: 100px;
+      height: 4px;
+      background: var(--primary-light);
+      margin: 0.5rem auto;
+      border-radius: 2px;
+    }
+
+    .upload-section {
+      background: #f8f9fa;
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 2px dashed #ced4da;
+      transition: var(--transition);
+      text-align: center;
+    }
+
+    .upload-section:hover {
+      border-color: var(--primary-light);
+      background: rgba(72, 149, 239, 0.05);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .file-input-label {
+      display: block;
+      padding: 1.5rem;
+      background: white;
+      border: 2px solid var(--primary);
+      border-radius: var(--border-radius);
+      color: var(--primary);
+      font-weight: 600;
+      text-align: center;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .file-input-label:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .file-input-label i {
+      display: block;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    button[type="submit"] {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    button[type="submit"]:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .file-list {
+      list-style: none;
+      margin-top: 2rem;
+    }
+
+    .file-list li {
+      background: white;
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+    }
+
+    .file-list li:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .file-list a {
+      color: var(--dark);
+      text-decoration: none;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .file-list a::before {
+      content: '📄';
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
+    }
+
+    .file-list a:hover {
+      color: var(--primary);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: #6c757d;
+    }
+
+    .empty-state img {
+      max-width: 200px;
+      margin-bottom: 1rem;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .container {
+        padding: 1.5rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h2>Upload a file</h2>
-  <form action="/upload" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" required />
-    <button type="submit">Upload</button>
-  </form>
+  <div class="container">
+    <h2>Unlimited Drive</h2>
+    
+    <div class="upload-section">
+      <form action="/upload" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+          <div class="file-input-wrapper">
+            <input type="file" name="file" id="file" required />
+            <label for="file" class="file-input-label">
+              <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ba145696-9b35-4100-925e-f5c0cb3a6540.png" alt="Cloud upload icon with upward arrow" style="width: 60px; height: 60px; margin: 0 auto 1rem; display: block;" />
+              <span>Choose a file or drag it here</span>
+            </label>
+          </div>
+        </div>
+        <button type="submit">Upload File</button>
+      </form>
+    </div>
 
-  <h3>Uploaded Files:</h3>
-  <ul id="fileList"></ul>
+    <h3>Your Uploaded Files</h3>
+    <ul id="fileList" class="file-list">
+      <!-- Files will be dynamically inserted here -->
+    </ul>
+  </div>
 
   <script>
     fetch("/data")
       .then((res) => res.json())
       .then((data) => {
         const list = document.getElementById("fileList");
+        
+        if (data.length === 0) {
+          list.innerHTML = `
+            <div class="empty-state">
+              <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/92e56853-cd6b-458b-b948-c758408fe359.png" alt="Empty folder illustration with magnifying glass" />
+              <p>No files uploaded yet. Upload your first file to get started!</p>
+            </div>
+          `;
+          return;
+        }
+
         data.forEach((file) => {
           const li = document.createElement("li");
-          li.innerHTML = `<a href="${file.path}" target="_blank">${file.filename}</a>`;
+          li.innerHTML = `
+            <a href="${file.path}" target="_blank">
+              <span>${file.filename}</span>
+            </a>
+          `;
           list.appendChild(li);
         });
+      })
+      .catch(error => {
+        console.error("Error fetching files:", error);
+        document.getElementById("fileList").innerHTML = `
+          <div class="empty-state">
+            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8d531c70-d555-4157-a570-31d6f30041b4.png" alt="Error illustration with warning sign" />
+            <p>Could not load files. Please try again later.</p>
+          </div>
+        `;
       });
+
+    // Add drag and drop functionality
+    const dropArea = document.querySelector('.upload-section');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight() {
+      dropArea.style.borderColor = var(--primary);
+      dropArea.style.backgroundColor = 'rgba(72, 149, 239, 0.1)';
+    }
+
+    function unhighlight() {
+      dropArea.style.borderColor = '#ced4da';
+      dropArea.style.backgroundColor = '#f8f9fa';
+    }
+
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      document.querySelector('input[type="file"]').files = files;
+      
+      // Update the label to show file name
+      const label = document.querySelector('.file-input-label span');
+      if (files.length > 0) {
+        label.textContent = files[0].name;
+      }
+    }
   </script>
 </body>
 </html>
+
