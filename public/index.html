@@ -23,6 +23,39 @@
       justify-content: space-between;
     }
 
+    .menu {
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0 10px;
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 60px;
+      right: 10px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: none;
+      z-index: 10;
+    }
+
+    .dropdown button {
+      display: block;
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .dropdown button:hover {
+      background: #f1f1f1;
+    }
+
     main {
       padding: 20px;
     }
@@ -118,6 +151,14 @@
 <body>
   <header>
     📂 MyDrive
+    <div class="menu" onclick="toggleDropdown()">☰</div>
+    <div class="dropdown" id="dropdownMenu">
+      <button onclick="setFilter('images')">🖼️ ফটো</button>
+      <button onclick="setFilter('videos')">🎞️ ভিডিও</button>
+      <button onclick="setFilter('audios')">🎵 অডিও</button>
+      <button onclick="setFilter('docs')">📄 ডকুমেন্ট</button>
+      <button onclick="setFilter('all')">✅ সকল ফাইল</button>
+    </div>
   </header>
   <main>
     <div id="uploadSection">
@@ -139,25 +180,45 @@
 
     const getFileIcon = (filename) => {
       const ext = filename.split('.').pop().toLowerCase();
-      if (['jpg', 'png', 'jpeg', 'gif'].includes(ext)) return '🖼️';
-      if (['mp4', 'mkv'].includes(ext)) return '🎞️';
-      if (['mp3', 'wav'].includes(ext)) return '🎵';
-      if (['pdf'].includes(ext)) return '📄';
-      return '📁';
+      if (["jpg", "png", "jpeg", "gif"].includes(ext)) return "🖼️";
+      if (["mp4", "mkv"].includes(ext)) return "🎞️";
+      if (["mp3", "wav"].includes(ext)) return "🎵";
+      if (["pdf", "doc", "docx"].includes(ext)) return "📄";
+      return "📁";
     };
+
+    function toggleDropdown() {
+      const menu = document.getElementById('dropdownMenu');
+      menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function setFilter(type) {
+      localStorage.setItem('filterType', type);
+      location.reload();
+    }
 
     async function loadFiles() {
       try {
         const res = await fetch(`${BACKUP_SERVER}/files`);
         const files = await res.json();
         const list = document.getElementById('fileList');
+        const filter = localStorage.getItem('filterType') || 'all';
         list.innerHTML = '';
+
+        const fileFilter = {
+          images: ["jpg", "png", "jpeg", "gif"],
+          videos: ["mp4", "mkv"],
+          audios: ["mp3", "wav"],
+          docs: ["pdf", "doc", "docx"]
+        };
 
         files.reverse().forEach(file => {
           const name = file.name;
           const path = file.path;
+          const ext = name.split('.').pop().toLowerCase();
 
           if (name === '.gitkeep') return;
+          if (filter !== 'all' && !fileFilter[filter].includes(ext)) return;
 
           const card = document.createElement('div');
           card.className = 'file-card';
