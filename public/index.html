@@ -5,72 +5,73 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>🚀 Unlimited Drive Upload</title>
   <style>
-    body { font-family: Arial; padding: 20px; text-align: center; }
-    h1 { font-size: 28px; }
-    #fileList a { display: block; margin: 5px 0; }
+    body { font-family: Arial; text-align: center; padding: 20px; background: #f3f3f3; }
+    h1 { color: #3f37c9; }
+    #fileList a { display: block; margin: 5px 0; color: #1e40af; word-break: break-all; }
+    img, audio { margin-top: 10px; max-width: 90%; }
   </style>
 </head>
 <body>
   <h1>📤 Upload to Unlimited Drive</h1>
-  <form id="uploadForm">
-    <input type="file" id="fileInput" required />
-    <button type="submit">Upload</button>
-  </form>
-
+  <input type="file" id="fileInput" />
+  <button onclick="uploadFile()">Upload</button>
   <div id="message"></div>
+
   <h2>📁 Uploaded Files</h2>
   <div id="fileList">Loading...</div>
 
   <script>
-    const uploadForm = document.getElementById('uploadForm');
     const fileInput = document.getElementById('fileInput');
-    const messageDiv = document.getElementById('message');
-    const fileListDiv = document.getElementById('fileList');
+    const message = document.getElementById('message');
+    const fileList = document.getElementById('fileList');
 
-    const BACKUP_STORAGE = 'https://drive-main-storage.onrender.com';
+    const BACKUP = 'https://drive-main-storage.onrender.com';
 
-    uploadForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    async function uploadFile() {
       const file = fileInput.files[0];
-      if (!file) return;
+      if (!file) {
+        message.innerHTML = "❌ Please choose a file!";
+        return;
+      }
 
       const formData = new FormData();
       formData.append('file', file);
-
-      messageDiv.innerHTML = '⏳ Uploading...';
+      message.innerHTML = "⏳ Uploading...";
 
       try {
-        const res = await fetch(`${BACKUP_STORAGE}/upload`, {
-          method: 'POST',
-          body: formData
-        });
+        const res = await fetch('/upload', { method: 'POST', body: formData });
         const data = await res.json();
-        messageDiv.innerHTML = `✅ File uploaded successfully!<br><a href="${data.url}" target="_blank">${data.url}</a>`;
-        fetchUploadedFiles();
-      } catch (err) {
-        messageDiv.innerHTML = '❌ Upload failed';
-      }
-    });
-
-    async function fetchUploadedFiles() {
-      try {
-        const res = await fetch(`${BACKUP_STORAGE}/files`);
-        const files = await res.json();
-        fileListDiv.innerHTML = '';
-        files.reverse().forEach(file => {
-          const link = document.createElement('a');
-          link.href = file.url;
-          link.target = '_blank';
-          link.textContent = file.url;
-          fileListDiv.appendChild(link);
-        });
+        const filename = data.url.split('/').pop();
+        const fullURL = `${window.location.origin}/drive-files/${filename}`;
+        message.innerHTML = `✅ Uploaded: <a href="${fullURL}" target="_blank">${fullURL}</a>`;
+        fetchFiles();
       } catch {
-        fileListDiv.innerText = '❌ Failed to load files';
+        message.innerHTML = "❌ Upload failed.";
       }
     }
 
-    // Load files on page load
-    window.onload = fetchUploadedFiles;
+    async function fetchFiles() {
+      try {
+        const res = await fetch(`${BACKUP}/files`);
+        const files = await res.json();
+        fileList.innerHTML = "";
+        files.reverse().forEach(f => {
+          const name = f.url.split('/').pop();
+          const proxyURL = `${window.location.origin}/drive-files/${name}`;
+          const link = `<a href="${proxyURL}" target="_blank">${proxyURL}</a>`;
+          const preview = name.endsWith('.jpg') || name.endsWith('.png') || name.endsWith('.jpeg')
+            ? `<img src="${proxyURL}" />`
+            : name.endsWith('.mp3')
+            ? `<audio controls src="${proxyURL}"></audio>`
+            : '';
+          fileList.innerHTML += `${link}<br>${preview}<hr>`;
+        });
+      } catch {
+        fileList.innerText = "❌ Failed to load files.";
+      }
+    }
+
+    window.onload = fetchFiles;
   </script>
 </body>
 </html>
