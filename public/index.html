@@ -74,11 +74,6 @@
       text-align: center;
     }
 
-    .upload-section:hover {
-      border-color: var(--primary-light);
-      background: rgba(72, 149, 239, 0.05);
-    }
-
     .form-group {
       margin-bottom: 1.5rem;
     }
@@ -117,12 +112,6 @@
       color: white;
     }
 
-    .file-input-label i {
-      display: block;
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-
     button[type="submit"] {
       background: var(--primary);
       color: white;
@@ -135,12 +124,6 @@
       transition: var(--transition);
       width: 100%;
       margin-top: 1rem;
-    }
-
-    button[type="submit"]:hover {
-      background: var(--secondary);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     .file-list {
@@ -156,12 +139,6 @@
       display: flex;
       align-items: center;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      transition: var(--transition);
-    }
-
-    .file-list li:hover {
-      transform: translateX(5px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     .file-list a {
@@ -178,10 +155,6 @@
       font-size: 1.25rem;
     }
 
-    .file-list a:hover {
-      color: var(--primary);
-    }
-
     .empty-state {
       text-align: center;
       padding: 2rem;
@@ -193,34 +166,20 @@
       margin-bottom: 1rem;
       opacity: 0.7;
     }
-
-    @media (max-width: 768px) {
-      body {
-        padding: 1rem;
-      }
-      
-      .container {
-        padding: 1.5rem;
-      }
-      
-      h2 {
-        font-size: 1.5rem;
-      }
-    }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Unlimited Drive</h2>
-    
-    <div class="upload-section">
-      <form action="/upload" method="post" enctype="multipart/form-data">
+
+    <div class="upload-section" id="drop-area">
+      <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
         <div class="form-group">
           <div class="file-input-wrapper">
             <input type="file" name="file" id="file" required />
             <label for="file" class="file-input-label">
-              <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ba145696-9b35-4100-925e-f5c0cb3a6540.png" alt="Cloud upload icon with upward arrow" style="width: 60px; height: 60px; margin: 0 auto 1rem; display: block;" />
-              <span>Choose a file or drag it here</span>
+              <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ba145696-9b35-4100-925e-f5c0cb3a6540.png" alt="Cloud upload icon" style="width: 60px; height: 60px; margin: 0 auto 1rem; display: block;" />
+              <span id="fileLabel">Choose a file or drag it here</span>
             </label>
           </div>
         </div>
@@ -229,91 +188,73 @@
     </div>
 
     <h3>Your Uploaded Files</h3>
-    <ul id="fileList" class="file-list">
-      <!-- Files will be dynamically inserted here -->
-    </ul>
+    <ul id="fileList" class="file-list"></ul>
   </div>
 
   <script>
+    // Fetch files
     fetch("/data")
-      .then((res) => res.json())
-      .then((data) => {
+      .then(res => res.json())
+      .then(data => {
         const list = document.getElementById("fileList");
-        
         if (data.length === 0) {
           list.innerHTML = `
             <div class="empty-state">
-              <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/92e56853-cd6b-458b-b948-c758408fe359.png" alt="Empty folder illustration with magnifying glass" />
+              <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/92e56853-cd6b-458b-b948-c758408fe359.png" />
               <p>No files uploaded yet. Upload your first file to get started!</p>
             </div>
           `;
           return;
         }
-
-        data.forEach((file) => {
+        data.forEach(file => {
           const li = document.createElement("li");
-          li.innerHTML = `
-            <a href="${file.path}" target="_blank">
-              <span>${file.filename}</span>
-            </a>
-          `;
+          li.innerHTML = `<a href="${file.path}" target="_blank"><span>${file.filename}</span></a>`;
           list.appendChild(li);
         });
-      })
-      .catch(error => {
-        console.error("Error fetching files:", error);
-        document.getElementById("fileList").innerHTML = `
-          <div class="empty-state">
-            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8d531c70-d555-4157-a570-31d6f30041b4.png" alt="Error illustration with warning sign" />
-            <p>Could not load files. Please try again later.</p>
-          </div>
-        `;
       });
 
-    // Add drag and drop functionality
-    const dropArea = document.querySelector('.upload-section');
-    
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      dropArea.addEventListener(eventName, preventDefaults, false);
+    // Drag & Drop support
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file');
+    const fileLabel = document.getElementById('fileLabel');
+    const uploadForm = document.getElementById('uploadForm');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
+      dropArea.addEventListener(event, e => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
     });
 
-    function preventDefaults(e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropArea.addEventListener(eventName, highlight, false);
+    ['dragenter', 'dragover'].forEach(event => {
+      dropArea.addEventListener(event, () => {
+        dropArea.style.borderColor = '#4895ef';
+        dropArea.style.backgroundColor = 'rgba(72,149,239,0.1)';
+      });
     });
 
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropArea.addEventListener(eventName, unhighlight, false);
+    ['dragleave', 'drop'].forEach(event => {
+      dropArea.addEventListener(event, () => {
+        dropArea.style.borderColor = '#ced4da';
+        dropArea.style.backgroundColor = '#f8f9fa';
+      });
     });
 
-    function highlight() {
-      dropArea.style.borderColor = var(--primary);
-      dropArea.style.backgroundColor = 'rgba(72, 149, 239, 0.1)';
-    }
-
-    function unhighlight() {
-      dropArea.style.borderColor = '#ced4da';
-      dropArea.style.backgroundColor = '#f8f9fa';
-    }
-
-    dropArea.addEventListener('drop', handleDrop, false);
-
-    function handleDrop(e) {
-      const dt = e.dataTransfer;
-      const files = dt.files;
-      document.querySelector('input[type="file"]').files = files;
-      
-      // Update the label to show file name
-      const label = document.querySelector('.file-input-label span');
+    dropArea.addEventListener('drop', e => {
+      const files = e.dataTransfer.files;
+      fileInput.files = files;
       if (files.length > 0) {
-        label.textContent = files[0].name;
+        fileLabel.textContent = files[0].name;
+        uploadForm.submit(); // Auto-submit on drop
       }
-    }
+    });
+
+    // Show filename when manually selected
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files.length > 0) {
+        fileLabel.textContent = fileInput.files[0].name;
+      }
+    });
   </script>
 </body>
 </html>
-
