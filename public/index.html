@@ -1,46 +1,113 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🚀 Unlimited Drive Upload</title>
+  <title>📂 MyDrive - Google Drive Style</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #4285f4;
+      color: white;
+      padding: 15px 30px;
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+
+    main {
       padding: 20px;
-      background: #f0f0f0;
     }
-    h1 {
-      color: #3f37c9;
+
+    #uploadSection {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    #fileList a {
-      display: block;
-      color: blue;
-      text-decoration: underline;
-      margin: 5px 0;
-      word-break: break-word;
+
+    input[type="file"] {
+      flex: 1;
     }
+
+    button {
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #3367d6;
+    }
+
     progress {
       width: 100%;
-      height: 20px;
-      margin-top: 10px;
+      height: 15px;
       display: none;
+      margin-top: 10px;
+    }
+
+    #status {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    #fileList {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .file-card {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      word-break: break-word;
+      text-align: center;
+    }
+
+    .file-card a {
+      text-decoration: none;
+      color: #4285f4;
+    }
+
+    h2 {
+      margin-top: 40px;
     }
   </style>
 </head>
 <body>
-  <h1>🚀 Unlimited Drive Upload</h1>
+  <header>📂 MyDrive</header>
+  <main>
+    <div id="uploadSection">
+      <form id="uploadForm">
+        <input type="file" name="file" required />
+        <button type="submit">আপলোড</button>
+      </form>
+    </div>
 
-  <form id="uploadForm">
-    <input type="file" name="file" required />
-    <button type="submit">Upload</button>
-  </form>
+    <progress id="progressBar" value="0" max="100"></progress>
+    <p id="status"></p>
 
-  <progress id="progressBar" value="0" max="100"></progress>
-  <p id="status"></p>
-
-  <h2>📁 Uploaded Files</h2>
-  <div id="fileList"></div>
+    <h2>আপলোডকৃত ফাইলসমূহ</h2>
+    <div id="fileList"></div>
+  </main>
 
   <script>
     const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
@@ -53,14 +120,19 @@
         list.innerHTML = '';
 
         files.reverse().forEach(file => {
+          const div = document.createElement('div');
+          div.className = 'file-card';
+
           const a = document.createElement('a');
           a.href = file.url;
           a.target = '_blank';
-          a.textContent = file.url;
-          list.appendChild(a);
+          a.textContent = file.url.split('/').pop();
+
+          div.appendChild(a);
+          list.appendChild(div);
         });
       } catch (err) {
-        document.getElementById('fileList').innerHTML = '❌ Failed to load files.';
+        document.getElementById('fileList').innerHTML = '❌ ফাইল লোড করা যায়নি।';
       }
     }
 
@@ -70,10 +142,10 @@
       const formData = new FormData(form);
       const status = document.getElementById('status');
       const progressBar = document.getElementById('progressBar');
-      
+
       progressBar.style.display = 'block';
       progressBar.value = 0;
-      status.textContent = 'Uploading...';
+      status.textContent = 'আপলোড হচ্ছে...';
 
       const xhr = new XMLHttpRequest();
 
@@ -88,21 +160,22 @@
         if (xhr.status === 200) {
           const data = JSON.parse(xhr.responseText);
           if (data.url) {
-            status.textContent = '✅ Uploaded!';
+            status.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
             progressBar.style.display = 'none';
+            form.reset();
             await loadFiles();
           } else {
-            status.textContent = '❌ Upload failed!';
+            status.textContent = '❌ আপলোড ব্যর্থ হয়েছে!';
             progressBar.style.display = 'none';
           }
         } else {
-          status.textContent = '❌ Upload failed!';
+          status.textContent = '❌ আপলোড ব্যর্থ হয়েছে!';
           progressBar.style.display = 'none';
         }
       };
 
       xhr.onerror = function() {
-        status.textContent = '❌ Upload error!';
+        status.textContent = '❌ আপলোডে সমস্যা হয়েছে!';
         progressBar.style.display = 'none';
       };
 
