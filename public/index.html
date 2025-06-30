@@ -6,89 +6,87 @@
   <title>🚀 Unlimited Drive Upload</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
       text-align: center;
-      margin: 50px auto;
-      max-width: 600px;
+      padding: 20px;
     }
-    input[type="file"] {
-      margin: 20px 0;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #4361ee;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #3f37c9;
-    }
-    #preview {
-      margin-top: 30px;
-    }
-    a {
-      color: #4895ef;
+    #uploadStatus {
+      margin-top: 10px;
       font-weight: bold;
     }
-    img {
-      margin-top: 10px;
-      max-width: 100%;
-      border-radius: 10px;
+    a {
+      word-break: break-all;
     }
   </style>
 </head>
 <body>
+
   <h1>📤 Upload to Unlimited Drive</h1>
+
   <input type="file" id="fileInput" />
-  <br/>
   <button onclick="uploadFile()">Upload</button>
 
+  <div id="uploadStatus"></div>
+
+  <hr/>
+  <h2>📁 Uploaded Files</h2>
   <div id="preview"></div>
 
   <script>
+    const fileInput = document.getElementById("fileInput");
+    const uploadStatus = document.getElementById("uploadStatus");
+    const preview = document.getElementById("preview");
+
     async function uploadFile() {
-      const fileInput = document.getElementById('fileInput');
       const file = fileInput.files[0];
       if (!file) {
-        alert('Please select a file first!');
+        uploadStatus.innerHTML = "❌ Please choose a file!";
         return;
       }
 
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
       try {
-        const response = await fetch('/upload', {
-          method: 'POST',
-          body: formData
+        const res = await fetch("https://drive-main-storage.onrender.com/upload", {
+          method: "POST",
+          body: formData,
         });
 
-        const result = await response.json();
+        const data = await res.json();
+        if (data.url) {
+          uploadStatus.innerHTML = `✅ File uploaded successfully!<br>
+            <a href="https://drive-main-storage.onrender.com${data.url}" target="_blank">
+              https://drive-main-storage.onrender.com${data.url}
+            </a>`;
 
-        if (result.url) {
-          const fileURL = 'https://drive-main-storage.onrender.com' + result.url;
-
-          let previewHTML = `
-            <p>✅ File uploaded successfully!</p>
-            <a href="${fileURL}" target="_blank">${fileURL}</a>
-          `;
-
-          if (file.type.startsWith('image/')) {
-            previewHTML += `<br/><img src="${fileURL}" alt="Uploaded Image">`;
-          }
-
-          document.getElementById('preview').innerHTML = previewHTML;
+          loadHistory(); // Reload preview
         } else {
-          document.getElementById('preview').innerText = '❌ Upload failed';
+          uploadStatus.innerHTML = "❌ Upload failed";
         }
-
       } catch (err) {
-        console.error(err);
-        document.getElementById('preview').innerText = '❌ Error uploading file';
+        uploadStatus.innerHTML = "❌ Error uploading file";
       }
     }
+
+    async function loadHistory() {
+      const res = await fetch("https://drive-main-storage.onrender.com/history");
+      const files = await res.json();
+
+      preview.innerHTML = '';
+      files.reverse().forEach(file => {
+        const fullURL = "https://drive-main-storage.onrender.com" + file.url;
+        preview.innerHTML += `
+          <div style="margin:10px 0">
+            <a href="${fullURL}" target="_blank">${fullURL}</a><br/>
+            <img src="${fullURL}" width="200" style="margin-top:5px;border:1px solid #ccc" />
+          </div>
+        `;
+      });
+    }
+
+    window.onload = loadHistory;
   </script>
+
 </body>
 </html>
