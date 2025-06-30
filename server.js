@@ -8,17 +8,12 @@ const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Serve static frontend (e.g. index.html inside /public)
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Temp upload folder
 const upload = multer({ dest: 'temp_uploads/' });
 
-// Upload route - sends file to Backup Storage
+// Upload route: send file to backup server
 app.post('/upload', upload.single('file'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: '❌ No file uploaded' });
-  }
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
   try {
     const form = new FormData();
@@ -30,23 +25,14 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       { headers: form.getHeaders() }
     );
 
-    // Remove the temp file after sending
-    fs.unlink(req.file.path, err => {
-      if (err) console.error('Temp cleanup failed:', err);
-    });
-
-    res.json({
-      message: '✅ File uploaded successfully!',
-      url: response.data.url
-    });
-
+    fs.unlink(req.file.path, () => {}); // delete temp
+    res.json({ url: response.data.url });
   } catch (err) {
-    console.error('Upload error:', err.message);
-    res.status(500).json({ error: '❌ Failed to upload to backup storage' });
+    res.status(500).json({ error: 'Upload failed to backup server' });
   }
 });
 
-// Proxy route: serve backup files without showing backup URL
+// Proxy route: hide actual backup link
 app.get('/drive-files/:file', async (req, res) => {
   const filePath = req.params.file;
   const backupURL = `https://drive-main-storage.onrender.com/uploads/${filePath}`;
@@ -55,11 +41,10 @@ app.get('/drive-files/:file', async (req, res) => {
     const response = await axios.get(backupURL, { responseType: 'stream' });
     response.data.pipe(res);
   } catch (err) {
-    res.status(404).send('❌ File not found in backup');
+    res.status(404).send('File not found');
   }
 });
 
-// Start server
 app.listen(port, () => {
-  console.log(`🚀 Main App running at http://localhost:${port}`);
+  console.log(`🚀 Main App running on http://localhost:${port}`);
 });
