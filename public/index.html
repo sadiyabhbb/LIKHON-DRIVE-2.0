@@ -2,403 +2,93 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LIKHON | UNLIMITED DRIVE STORAGE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🚀 Unlimited Drive Upload</title>
   <style>
-    :root {
-      --primary: #4361ee;
-      --primary-light: #4895ef;
-      --secondary: #3f37c9;
-      --dark: #1b263b;
-      --light: #f8f9fa;
-      --success: #4cc9f0;
-      --danger: #f72585;
-      --border-radius: 8px;
-      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      --transition: all 0.3s ease;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
     body {
-      background-color: #f5f7fa;
-      color: var(--dark);
-      line-height: 1.6;
-      padding: 2rem;
-      min-height: 100vh;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: white;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow);
-      padding: 2rem;
-    }
-
-    h2, h3 {
-      color: var(--secondary);
-      margin-bottom: 1rem;
-    }
-
-    h2 {
-      font-size: 2rem;
+      font-family: Arial, sans-serif;
       text-align: center;
-      margin-bottom: 2rem;
-      position: relative;
+      margin: 50px auto;
+      max-width: 600px;
     }
-
-    h2::after {
-      content: '';
-      display: block;
-      width: 100px;
-      height: 4px;
-      background: var(--primary-light);
-      margin: 0.5rem auto;
-      border-radius: 2px;
+    input[type="file"] {
+      margin: 20px 0;
     }
-
-    .upload-section {
-      background: #f8f9fa;
-      border-radius: var(--border-radius);
-      padding: 2rem;
-      margin-bottom: 2rem;
-      border: 2px dashed #ced4da;
-      transition: var(--transition);
-      text-align: center;
-    }
-
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .file-input-wrapper {
-      position: relative;
-      display: inline-block;
-      width: 100%;
-    }
-
-    .file-input-wrapper input[type="file"] {
-      position: absolute;
-      left: 0;
-      top: 0;
-      opacity: 0;
-      width: 100%;
-      height: 100%;
-      cursor: pointer;
-    }
-
-    .file-input-label {
-      display: block;
-      padding: 1.5rem;
-      background: white;
-      border: 2px solid var(--primary);
-      border-radius: var(--border-radius);
-      color: var(--primary);
-      font-weight: 600;
-      text-align: center;
-      transition: var(--transition);
-      cursor: pointer;
-    }
-
-    .file-input-label:hover {
-      background: var(--primary);
-      color: white;
-    }
-
-    button[type="submit"] {
-      background: var(--primary);
+    button {
+      padding: 10px 20px;
+      background-color: #4361ee;
       color: white;
       border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: var(--border-radius);
-      font-size: 1rem;
-      font-weight: 600;
+      border-radius: 5px;
       cursor: pointer;
-      transition: var(--transition);
-      width: 100%;
-      margin-top: 1rem;
     }
-
-    .file-list {
-      list-style: none;
-      margin-top: 1rem;
-      margin-bottom: 2rem;
-      padding: 0;
+    button:hover {
+      background-color: #3f37c9;
     }
-
-    .file-list li {
-      background: white;
-      padding: 1rem;
-      border-radius: var(--border-radius);
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    #preview {
+      margin-top: 30px;
     }
-
-    .file-list a {
-      color: var(--dark);
-      text-decoration: none;
-      flex-grow: 1;
-      display: flex;
-      align-items: center;
-    }
-
-    .file-list img.thumbnail {
-      width: 50px;
-      height: 50px;
-      object-fit: cover;
-      border-radius: 6px;
-      margin-right: 12px;
-      border: 1px solid #ddd;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .file-list .icon {
-      font-size: 30px;
-      margin-right: 10px;
-      width: 40px;
-      text-align: center;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 2rem;
-      color: #6c757d;
-    }
-
-    .empty-state img {
-      max-width: 200px;
-      margin-bottom: 1rem;
-      opacity: 0.7;
-    }
-
-    #progressBar {
-      width: 100%;
-      height: 20px;
-      display: none;
-      margin-top: 1rem;
-    }
-
-    #uploadingText {
-      margin-top: 1rem;
-      font-weight: bold;
+    a {
       color: #4895ef;
-      display: none;
+      font-weight: bold;
+    }
+    img {
+      margin-top: 10px;
+      max-width: 100%;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Unlimited Drive</h2>
+  <h1>📤 Upload to Unlimited Drive</h1>
+  <input type="file" id="fileInput" />
+  <br/>
+  <button onclick="uploadFile()">Upload</button>
 
-    <div class="upload-section" id="drop-area">
-      <form id="uploadForm">
-        <div class="form-group">
-          <div class="file-input-wrapper">
-            <input type="file" name="file" id="file" required />
-            <label for="file" class="file-input-label">
-              <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ba145696-9b35-4100-925e-f5c0cb3a6540.png" alt="Upload" style="width: 60px; height: 60px; margin: 0 auto 1rem;" />
-              <span id="fileLabel">Choose a file or drag it here</span>
-            </label>
-          </div>
-        </div>
-        <progress id="progressBar" value="0" max="100"></progress>
-        <div id="uploadingText">Uploading...</div>
-        <button type="submit">Upload File</button>
-      </form>
-    </div>
-
-    <h3>📷 Images</h3>
-    <ul id="imageList" class="file-list"></ul>
-
-    <h3>🎬 Videos</h3>
-    <ul id="videoList" class="file-list"></ul>
-
-    <h3>📄 Documents</h3>
-    <ul id="docList" class="file-list"></ul>
-
-    <h3>🎵 Music</h3>
-    <ul id="musicList" class="file-list"></ul>
-  </div>
+  <div id="preview"></div>
 
   <script>
-    const dropArea = document.getElementById('drop-area');
-    const fileInput = document.getElementById('file');
-    const fileLabel = document.getElementById('fileLabel');
-    const uploadForm = document.getElementById('uploadForm');
-    const progressBar = document.getElementById('progressBar');
-    const uploadingText = document.getElementById('uploadingText');
-
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
-      dropArea.addEventListener(event, e => {
-        e.preventDefault();
-        e.stopPropagation();
-      });
-    });
-
-    ['dragenter', 'dragover'].forEach(event => {
-      dropArea.addEventListener(event, () => {
-        dropArea.style.borderColor = '#4895ef';
-        dropArea.style.backgroundColor = 'rgba(72,149,239,0.1)';
-      });
-    });
-
-    ['dragleave', 'drop'].forEach(event => {
-      dropArea.addEventListener(event, () => {
-        dropArea.style.borderColor = '#ced4da';
-        dropArea.style.backgroundColor = '#f8f9fa';
-      });
-    });
-
-    dropArea.addEventListener('drop', e => {
-      const files = e.dataTransfer.files;
-      fileInput.files = files;
-      if (files.length > 0) {
-        fileLabel.textContent = files[0].name;
-        uploadFile(files[0]);
-      }
-    });
-
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files.length > 0) {
-        fileLabel.textContent = fileInput.files[0].name;
-      }
-    });
-
-    uploadForm.addEventListener('submit', e => {
-      e.preventDefault();
+    async function uploadFile() {
+      const fileInput = document.getElementById('fileInput');
       const file = fileInput.files[0];
-      if (file) uploadFile(file);
-    });
-
-    function uploadFile(file) {
-      const xhr = new XMLHttpRequest();
-      const formData = new FormData();
-      formData.append("file", file);
-
-      xhr.open("POST", "/upload", true);
-
-      progressBar.style.display = "block";
-      uploadingText.style.display = "block";
-      progressBar.value = 0;
-
-      xhr.upload.onprogress = function (e) {
-        if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          progressBar.value = percent;
-        }
-      };
-
-      xhr.onload = function () {
-        if (xhr.status === 200) {
-          progressBar.value = 100;
-          uploadingText.textContent = "Upload complete!";
-          setTimeout(() => {
-            progressBar.style.display = "none";
-            uploadingText.style.display = "none";
-            fileLabel.textContent = "Choose a file or drag it here";
-            fileInput.value = "";
-            fetchFiles();
-          }, 1000);
-        } else {
-          uploadingText.textContent = "Upload failed.";
-          progressBar.style.display = "none";
-        }
-      };
-
-      xhr.onerror = function () {
-        uploadingText.textContent = "Upload error.";
-        progressBar.style.display = "none";
-      };
-
-      xhr.send(formData);
-    }
-
-    function createFileElement(file) {
-      const ext = file.filename.split(".").pop().toLowerCase();
-      const a = document.createElement("a");
-      a.href = file.path;
-      a.target = "_blank";
-      a.textContent = file.filename;
-      a.style.display = "flex";
-      a.style.alignItems = "center";
-
-      // Create thumbnail or icon span
-      if (["jpg", "jpeg", "png", "gif", "webp", "bmp"].includes(ext)) {
-        const img = document.createElement("img");
-        img.src = file.path;
-        img.alt = file.filename;
-        img.className = "thumbnail";
-        a.prepend(img);
-      } else if (["mp4", "mkv", "avi", "mov", "webm"].includes(ext)) {
-        const icon = document.createElement("span");
-        icon.className = "icon";
-        icon.textContent = "🎬";
-        a.prepend(icon);
-      } else if (["mp3", "wav", "ogg", "m4a"].includes(ext)) {
-        const icon = document.createElement("span");
-        icon.className = "icon";
-        icon.textContent = "🎵";
-        a.prepend(icon);
-      } else if (["pdf", "doc", "docx", "txt", "ppt", "pptx", "xls", "xlsx"].includes(ext)) {
-        const icon = document.createElement("span");
-        icon.className = "icon";
-        icon.textContent = "📄";
-        a.prepend(icon);
-      } else {
-        const icon = document.createElement("span");
-        icon.className = "icon";
-        icon.textContent = "📁";
-        a.prepend(icon);
+      if (!file) {
+        alert('Please select a file first!');
+        return;
       }
 
-      const li = document.createElement("li");
-      li.appendChild(a);
-      return li;
-    }
+      const formData = new FormData();
+      formData.append('file', file);
 
-    function fetchFiles() {
-      fetch("/data")
-        .then(res => res.json())
-        .then(data => {
-          const imageList = document.getElementById("imageList");
-          const videoList = document.getElementById("videoList");
-          const docList = document.getElementById("docList");
-          const musicList = document.getElementById("musicList");
-
-          imageList.innerHTML = "";
-          videoList.innerHTML = "";
-          docList.innerHTML = "";
-          musicList.innerHTML = "";
-
-          data.forEach(file => {
-            const ext = file.filename.split(".").pop().toLowerCase();
-            const li = createFileElement(file);
-
-            if (["jpg", "jpeg", "png", "gif", "webp", "bmp"].includes(ext)) {
-              imageList.appendChild(li);
-            } else if (["mp4", "mkv", "avi", "mov", "webm"].includes(ext)) {
-              videoList.appendChild(li);
-            } else if (["mp3", "wav", "ogg", "m4a"].includes(ext)) {
-              musicList.appendChild(li);
-            } else if (["pdf", "doc", "docx", "txt", "ppt", "pptx", "xls", "xlsx"].includes(ext)) {
-              docList.appendChild(li);
-            } else {
-              docList.appendChild(li);
-            }
-          });
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
         });
-    }
 
-    fetchFiles();
+        const result = await response.json();
+
+        if (result.url) {
+          const fileURL = 'https://drive-main-storage.onrender.com' + result.url;
+
+          let previewHTML = `
+            <p>✅ File uploaded successfully!</p>
+            <a href="${fileURL}" target="_blank">${fileURL}</a>
+          `;
+
+          if (file.type.startsWith('image/')) {
+            previewHTML += `<br/><img src="${fileURL}" alt="Uploaded Image">`;
+          }
+
+          document.getElementById('preview').innerHTML = previewHTML;
+        } else {
+          document.getElementById('preview').innerText = '❌ Upload failed';
+        }
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('preview').innerText = '❌ Error uploading file';
+      }
+    }
   </script>
 </body>
 </html>
