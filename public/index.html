@@ -128,7 +128,9 @@
 
     .file-list {
       list-style: none;
-      margin-top: 2rem;
+      margin-top: 1rem;
+      margin-bottom: 2rem;
+      padding: 0;
     }
 
     .file-list li {
@@ -203,8 +205,17 @@
       </form>
     </div>
 
-    <h3>Your Uploaded Files</h3>
-    <ul id="fileList" class="file-list"></ul>
+    <h3>📷 Images</h3>
+    <ul id="imageList" class="file-list"></ul>
+
+    <h3>🎬 Videos</h3>
+    <ul id="videoList" class="file-list"></ul>
+
+    <h3>📄 Documents</h3>
+    <ul id="docList" class="file-list"></ul>
+
+    <h3>🎵 Music</h3>
+    <ul id="musicList" class="file-list"></ul>
   </div>
 
   <script>
@@ -214,9 +225,7 @@
     const uploadForm = document.getElementById('uploadForm');
     const progressBar = document.getElementById('progressBar');
     const uploadingText = document.getElementById('uploadingText');
-    const fileList = document.getElementById('fileList');
 
-    // Prevent default drag behaviors
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
       dropArea.addEventListener(event, e => {
         e.preventDefault();
@@ -286,7 +295,7 @@
             uploadingText.style.display = "none";
             fileLabel.textContent = "Choose a file or drag it here";
             fileInput.value = "";
-            fetchFiles(); // Refresh file list
+            fetchFiles();
           }, 1000);
         } else {
           uploadingText.textContent = "Upload failed.";
@@ -306,25 +315,33 @@
       fetch("/data")
         .then(res => res.json())
         .then(data => {
-          fileList.innerHTML = "";
-          if (data.length === 0) {
-            fileList.innerHTML = `
-              <div class="empty-state">
-                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/92e56853-cd6b-458b-b948-c758408fe359.png" />
-                <p>No files uploaded yet. Upload your first file to get started!</p>
-              </div>
-            `;
-            return;
-          }
+          const imageList = document.getElementById("imageList");
+          const videoList = document.getElementById("videoList");
+          const docList = document.getElementById("docList");
+          const musicList = document.getElementById("musicList");
+
+          imageList.innerHTML = videoList.innerHTML = docList.innerHTML = musicList.innerHTML = "";
+
           data.forEach(file => {
+            const ext = file.filename.split(".").pop().toLowerCase();
             const li = document.createElement("li");
             li.innerHTML = `<a href="${file.path}" target="_blank"><span>${file.filename}</span></a>`;
-            fileList.appendChild(li);
+
+            if (["jpg", "jpeg", "png", "gif", "webp", "bmp"].includes(ext)) {
+              imageList.appendChild(li);
+            } else if (["mp4", "mkv", "avi", "mov", "webm"].includes(ext)) {
+              videoList.appendChild(li);
+            } else if (["mp3", "wav", "ogg", "m4a"].includes(ext)) {
+              musicList.appendChild(li);
+            } else if (["pdf", "doc", "docx", "txt", "ppt", "pptx", "xls", "xlsx"].includes(ext)) {
+              docList.appendChild(li);
+            } else {
+              docList.appendChild(li); // fallback
+            }
           });
         });
     }
 
-    // Initial file list fetch
     fetchFiles();
   </script>
 </body>
