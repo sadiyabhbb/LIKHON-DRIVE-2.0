@@ -18,7 +18,13 @@
       color: blue;
       text-decoration: underline;
       margin: 5px 0;
-      word-break: break-all;
+      word-break: break-word;
+    }
+    progress {
+      width: 100%;
+      height: 20px;
+      margin-top: 10px;
+      display: none;
     }
   </style>
 </head>
@@ -30,13 +36,14 @@
     <button type="submit">Upload</button>
   </form>
 
+  <progress id="progressBar" value="0" max="100"></progress>
   <p id="status"></p>
 
   <h2>📁 Uploaded Files</h2>
   <div id="fileList"></div>
 
   <script>
-    const BACKUP_SERVER = 'https://drive-main-storage.onrender.com'; // Change if needed
+    const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
 
     async function loadFiles() {
       try {
@@ -57,26 +64,50 @@
       }
     }
 
-    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const formData = new FormData(e.target);
-      document.getElementById('status').textContent = 'Uploading...';
+      const form = e.target;
+      const formData = new FormData(form);
+      const status = document.getElementById('status');
+      const progressBar = document.getElementById('progressBar');
+      
+      progressBar.style.display = 'block';
+      progressBar.value = 0;
+      status.textContent = 'Uploading...';
 
-      try {
-        const res = await fetch(`${BACKUP_SERVER}/upload`, {
-          method: 'POST',
-          body: formData
-        });
-        const data = await res.json();
-        if (data.url) {
-          document.getElementById('status').textContent = '✅ Uploaded!';
-          await loadFiles();
-        } else {
-          document.getElementById('status').textContent = '❌ Upload failed!';
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.onprogress = function(event) {
+        if (event.lengthComputable) {
+          const percent = (event.loaded / event.total) * 100;
+          progressBar.value = percent;
         }
-      } catch (err) {
-        document.getElementById('status').textContent = '❌ Upload error!';
-      }
+      };
+
+      xhr.onload = async function() {
+        if (xhr.status === 200) {
+          const data = JSON.parse(xhr.responseText);
+          if (data.url) {
+            status.textContent = '✅ Uploaded!';
+            progressBar.style.display = 'none';
+            await loadFiles();
+          } else {
+            status.textContent = '❌ Upload failed!';
+            progressBar.style.display = 'none';
+          }
+        } else {
+          status.textContent = '❌ Upload failed!';
+          progressBar.style.display = 'none';
+        }
+      };
+
+      xhr.onerror = function() {
+        status.textContent = '❌ Upload error!';
+        progressBar.style.display = 'none';
+      };
+
+      xhr.open('POST', `${BACKUP_SERVER}/upload`);
+      xhr.send(formData);
     });
 
     loadFiles();
