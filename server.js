@@ -1,53 +1,56 @@
-const express = require("express");
-const multer = require("multer");
-const fs = require("fs");
-const path = require("path");
-
+const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const path = require('path');
+const axios = require('axios');
+const multer = require('multer');
+const FormData = require('form-data');
+const fs = require('fs');
 
-app.use(express.static("public"));
-app.use("/uploads", express.static("uploads"));
+// ✅ Static files serve from 'public'
+app.use(express.static('public'));
+app.use(express.json());
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    const filename = Date.now() + "-" + file.originalname;
-    cb(null, filename);
-  },
-});
+// 🔗 গুদাম backend URL – এটাকে ঠিক রাখো
+const STORAGE_URL = 'https://drive-main-storage.onrender.com';
 
-const upload = multer({ storage });
+// 📤 File upload setup – temp folder
+const upload = multer({ dest: 'temp/' });
 
-app.post("/upload", upload.single("file"), (req, res) => {
-  if (!req.file) return res.status(400).send("No file uploaded.");
-
-  const fileInfo = {
-    filename: req.file.originalname,
-    path: `/uploads/${req.file.filename}`,
-  };
-
-  let data = [];
+// 📤 POST /upload → ফাইল গুদামে পাঠাও
+app.post('/upload', upload.single('file'), async (req, res) => {
   try {
-    data = JSON.parse(fs.readFileSync("data.json", "utf-8") || "[]");
-  } catch (e) {
-    data = [];
+    const form = new FormData();
+    const fileStream = fs.createReadStream(req.file.path);
+    form.append('file', fileStream, req.file.originalname);
+
+    const response = await axios.post(`${STORAGE_URL}/upload`, form, {
+      headers: form.getHeaders()
+    });
+
+    fs.unlinkSync(req.file.path); // temp ফাইল মুছে ফেলো
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Upload failed', details: err.message });
   }
-
-  data.push(fileInfo);
-
-  fs.writeFileSync("data.json", JSON.stringify(data, null, 2));
-  res.redirect("/");
 });
 
-app.get("/data", (req, res) => {
-  const data = fs.readFileSync("data.json", "utf-8");
-  res.setHeader("Content-Type", "application/json");
-  res.send(data);
+// 📥 GET /data → গুদাম থেকে সব ফাইলের ডেটা আনো
+app.get('/data', async (req, res) => {
+  try {
+    const response = await axios.get(`${STORAGE_URL}/data`);
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load data', details: err.message });
+  }
 });
 
+// 🏠 Home route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// 🚀 Server Run
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Running on http://localhost:${PORT}`);
+  console.log(`Main app running on port ${PORT}`);
 });
