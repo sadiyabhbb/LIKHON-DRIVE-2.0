@@ -5,92 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>🚀 Unlimited Drive Upload</title>
   <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 20px;
-      background: #f5f5f5;
-    }
-    h1 {
-      color: #3f37c9;
-    }
-    #uploadStatus {
-      margin-top: 20px;
-      font-weight: bold;
-      color: #1b1b1b;
-    }
-    a {
-      word-break: break-all;
-      color: #1e40af;
-      text-decoration: none;
-    }
-    img {
-      border: 1px solid #ccc;
-      margin-top: 10px;
-      max-width: 90%;
-    }
-    button {
-      padding: 8px 20px;
-      margin-left: 10px;
-      background: #4361ee;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    input[type="file"] {
-      padding: 6px;
-    }
+    body { font-family: Arial; padding: 20px; text-align: center; }
+    h1 { font-size: 28px; }
+    #fileList a { display: block; margin: 5px 0; }
   </style>
 </head>
 <body>
-
   <h1>📤 Upload to Unlimited Drive</h1>
+  <form id="uploadForm">
+    <input type="file" id="fileInput" required />
+    <button type="submit">Upload</button>
+  </form>
 
-  <input type="file" id="fileInput" />
-  <button onclick="uploadFile()">Upload</button>
-
-  <div id="uploadStatus"></div>
+  <div id="message"></div>
+  <h2>📁 Uploaded Files</h2>
+  <div id="fileList">Loading...</div>
 
   <script>
-    const fileInput = document.getElementById("fileInput");
-    const uploadStatus = document.getElementById("uploadStatus");
+    const uploadForm = document.getElementById('uploadForm');
+    const fileInput = document.getElementById('fileInput');
+    const messageDiv = document.getElementById('message');
+    const fileListDiv = document.getElementById('fileList');
 
-    async function uploadFile() {
+    const BACKUP_STORAGE = 'https://drive-main-storage.onrender.com';
+
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
       const file = fileInput.files[0];
-      if (!file) {
-        uploadStatus.innerHTML = "❌ Please choose a file!";
-        return;
-      }
+      if (!file) return;
 
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append('file', file);
+
+      messageDiv.innerHTML = '⏳ Uploading...';
 
       try {
-        const res = await fetch("/upload", {
-          method: "POST",
-          body: formData,
+        const res = await fetch(`${BACKUP_STORAGE}/upload`, {
+          method: 'POST',
+          body: formData
         });
-
         const data = await res.json();
-        if (data.url) {
-          // Extract filename from /uploads/filename
-          const fileName = data.url.split('/').pop();
-          const fullURL = window.location.origin + "/drive-files/" + fileName;
-
-          uploadStatus.innerHTML = `
-            ✅ File uploaded successfully!<br/>
-            <a href="${fullURL}" target="_blank">${fullURL}</a><br/>
-            <img src="${fullURL}" alt="preview" />
-          `;
-        } else {
-          uploadStatus.innerHTML = "❌ Upload failed";
-        }
+        messageDiv.innerHTML = `✅ File uploaded successfully!<br><a href="${data.url}" target="_blank">${data.url}</a>`;
+        fetchUploadedFiles();
       } catch (err) {
-        uploadStatus.innerHTML = "❌ Error uploading file";
+        messageDiv.innerHTML = '❌ Upload failed';
+      }
+    });
+
+    async function fetchUploadedFiles() {
+      try {
+        const res = await fetch(`${BACKUP_STORAGE}/files`);
+        const files = await res.json();
+        fileListDiv.innerHTML = '';
+        files.reverse().forEach(file => {
+          const link = document.createElement('a');
+          link.href = file.url;
+          link.target = '_blank';
+          link.textContent = file.url;
+          fileListDiv.appendChild(link);
+        });
+      } catch {
+        fileListDiv.innerText = '❌ Failed to load files';
       }
     }
-  </script>
 
+    // Load files on page load
+    window.onload = fetchUploadedFiles;
+  </script>
 </body>
 </html>
