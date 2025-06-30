@@ -1,100 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🚀 Unlimited Drive Upload</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      font-size: 28px;
-    }
-    input[type="file"] {
-      margin: 10px;
-    }
-    .uploaded-links {
-      margin-top: 30px;
-      text-align: left;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    a {
-      word-break: break-all;
-    }
-  </style>
-</head>
-<body>
+<script>
+  const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
 
-  <h1>📤 Upload to Unlimited Drive</h1>
+  async function loadUploadedFiles() {
+    try {
+      const res = await fetch(`${BACKUP_SERVER}/files`);
+      const files = await res.json();
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
 
-  <form id="uploadForm" enctype="multipart/form-data">
-    <input type="file" name="file" required />
-    <button type="submit">Upload</button>
-  </form>
+      files.reverse().forEach(file => {
+        const link = document.createElement('a');
+        link.href = file.url;
+        link.target = '_blank';
+        link.textContent = file.url;
+        fileList.appendChild(link);
+        fileList.appendChild(document.createElement('br'));
+      });
+    } catch (e) {
+      console.error('❌ Failed to load files:', e);
+    }
+  }
 
-  <div id="status"></div>
-
-  <div class="uploaded-links">
-    <h2>📁 Uploaded Files</h2>
-    <div id="fileList"></div>
-  </div>
-
-  <script>
-    const form = document.getElementById('uploadForm');
+  document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(document.getElementById('uploadForm'));
     const status = document.getElementById('status');
-    const fileList = document.getElementById('fileList');
+    status.innerHTML = '⏳ Uploading...';
 
-    // ✅ Show all uploaded files on load
-    async function loadUploadedFiles() {
-      try {
-        const res = await fetch('/files');
-        const files = await res.json();
-        fileList.innerHTML = '';
-        files.reverse().forEach(file => {
-          const link = document.createElement('a');
-          link.href = file.url;
-          link.target = '_blank';
-          link.textContent = file.url;
-          fileList.appendChild(link);
-          fileList.appendChild(document.createElement('br'));
-        });
-      } catch (e) {
-        console.error('❌ Failed to load files');
+    try {
+      const res = await fetch(`${BACKUP_SERVER}/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+
+      if (data.url) {
+        status.innerHTML = '✅ File uploaded successfully!';
+        document.getElementById('uploadForm').reset();
+        await loadUploadedFiles();
+      } else {
+        status.innerHTML = '❌ Upload failed';
       }
+    } catch (err) {
+      status.innerHTML = '❌ Error uploading file';
+      console.error(err);
     }
+  });
 
-    loadUploadedFiles(); // Load on page load
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
-      status.innerHTML = '⏳ Uploading...';
-
-      try {
-        const res = await fetch('/upload', {
-          method: 'POST',
-          body: formData
-        });
-        const data = await res.json();
-
-        if (data.url) {
-          status.innerHTML = '✅ File uploaded successfully!';
-          form.reset();
-          await loadUploadedFiles(); // Reload list
-        } else {
-          status.innerHTML = '❌ Upload failed';
-        }
-      } catch (err) {
-        status.innerHTML = '❌ Error uploading file';
-        console.error(err);
-      }
-    });
-  </script>
-
-</body>
-</html>
+  loadUploadedFiles();
+</script>
