@@ -1,16 +1,20 @@
 const express = require('express');
-const multer = require('multer');
 const path = require('path');
+const multer = require('multer');
 const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Multer temp storage
+// Serve static frontend (UI)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Multer temp storage setup
 const upload = multer({ dest: 'temp_uploads/' });
 
-// Upload route: frontend → this server → backup storage
+// File upload API route
 app.post('/upload', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
@@ -20,35 +24,29 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     const form = new FormData();
     form.append('file', fs.createReadStream(req.file.path), req.file.originalname);
 
-    // ✅ তোমার backup storage server
-    const storageURL = 'https://drive-main-storage.onrender.com/upload';
+    // 🔗 Send to your backup storage
+    const response = await axios.post(
+      'https://drive-main-storage.onrender.com/upload',
+      form,
+      { headers: form.getHeaders() }
+    );
 
-    // Send file to backup storage
-    const response = await axios.post(storageURL, form, {
-      headers: form.getHeaders()
-    });
-
-    // Remove temp file
+    // Remove temp file after upload
     fs.unlinkSync(req.file.path);
 
-    // Return final file URL from backup server
+    // Return uploaded file URL
     res.json({
-      message: '✅ File uploaded successfully to backup storage',
-      url: response.data.url // Example: /uploads/filename.jpg
+      message: '✅ File uploaded successfully!',
+      url: response.data.url
     });
 
-  } catch (error) {
-    console.error('Upload failed:', error.message);
-    res.status(500).json({ error: '❌ Failed to upload to storage server' });
+  } catch (err) {
+    console.error('Upload error:', err.message);
+    res.status(500).json({ error: '❌ Failed to upload to storage' });
   }
-});
-
-// Optional: homepage
-app.get('/', (req, res) => {
-  res.send('✅ Main App connected to Backup Storage');
 });
 
 // Start server
 app.listen(port, () => {
-  console.log(`🚀 Main App running at http://localhost:${port}`);
+  console.log(`🚀 Main App running on http://localhost:${port}`);
 });
