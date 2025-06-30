@@ -166,6 +166,20 @@
       margin-bottom: 1rem;
       opacity: 0.7;
     }
+
+    #progressBar {
+      width: 100%;
+      height: 20px;
+      display: none;
+      margin-top: 1rem;
+    }
+
+    #uploadingText {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #4895ef;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -173,16 +187,18 @@
     <h2>Unlimited Drive</h2>
 
     <div class="upload-section" id="drop-area">
-      <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+      <form id="uploadForm">
         <div class="form-group">
           <div class="file-input-wrapper">
             <input type="file" name="file" id="file" required />
             <label for="file" class="file-input-label">
-              <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ba145696-9b35-4100-925e-f5c0cb3a6540.png" alt="Cloud upload icon" style="width: 60px; height: 60px; margin: 0 auto 1rem; display: block;" />
+              <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ba145696-9b35-4100-925e-f5c0cb3a6540.png" alt="Upload" style="width: 60px; height: 60px; margin: 0 auto 1rem;" />
               <span id="fileLabel">Choose a file or drag it here</span>
             </label>
           </div>
         </div>
+        <progress id="progressBar" value="0" max="100"></progress>
+        <div id="uploadingText">Uploading...</div>
         <button type="submit">Upload File</button>
       </form>
     </div>
@@ -192,33 +208,15 @@
   </div>
 
   <script>
-    // Fetch files
-    fetch("/data")
-      .then(res => res.json())
-      .then(data => {
-        const list = document.getElementById("fileList");
-        if (data.length === 0) {
-          list.innerHTML = `
-            <div class="empty-state">
-              <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/92e56853-cd6b-458b-b948-c758408fe359.png" />
-              <p>No files uploaded yet. Upload your first file to get started!</p>
-            </div>
-          `;
-          return;
-        }
-        data.forEach(file => {
-          const li = document.createElement("li");
-          li.innerHTML = `<a href="${file.path}" target="_blank"><span>${file.filename}</span></a>`;
-          list.appendChild(li);
-        });
-      });
-
-    // Drag & Drop support
     const dropArea = document.getElementById('drop-area');
     const fileInput = document.getElementById('file');
     const fileLabel = document.getElementById('fileLabel');
     const uploadForm = document.getElementById('uploadForm');
+    const progressBar = document.getElementById('progressBar');
+    const uploadingText = document.getElementById('uploadingText');
+    const fileList = document.getElementById('fileList');
 
+    // Prevent default drag behaviors
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
       dropArea.addEventListener(event, e => {
         e.preventDefault();
@@ -245,16 +243,89 @@
       fileInput.files = files;
       if (files.length > 0) {
         fileLabel.textContent = files[0].name;
-        uploadForm.submit(); // Auto-submit on drop
+        uploadFile(files[0]);
       }
     });
 
-    // Show filename when manually selected
-    fileInput.addEventListener("change", () => {
+    fileInput.addEventListener('change', () => {
       if (fileInput.files.length > 0) {
         fileLabel.textContent = fileInput.files[0].name;
       }
     });
+
+    uploadForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const file = fileInput.files[0];
+      if (file) uploadFile(file);
+    });
+
+    function uploadFile(file) {
+      const xhr = new XMLHttpRequest();
+      const formData = new FormData();
+      formData.append("file", file);
+
+      xhr.open("POST", "/upload", true);
+
+      progressBar.style.display = "block";
+      uploadingText.style.display = "block";
+      progressBar.value = 0;
+
+      xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressBar.value = percent;
+        }
+      };
+
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          progressBar.value = 100;
+          uploadingText.textContent = "Upload complete!";
+          setTimeout(() => {
+            progressBar.style.display = "none";
+            uploadingText.style.display = "none";
+            fileLabel.textContent = "Choose a file or drag it here";
+            fileInput.value = "";
+            fetchFiles(); // Refresh file list
+          }, 1000);
+        } else {
+          uploadingText.textContent = "Upload failed.";
+          progressBar.style.display = "none";
+        }
+      };
+
+      xhr.onerror = function () {
+        uploadingText.textContent = "Upload error.";
+        progressBar.style.display = "none";
+      };
+
+      xhr.send(formData);
+    }
+
+    function fetchFiles() {
+      fetch("/data")
+        .then(res => res.json())
+        .then(data => {
+          fileList.innerHTML = "";
+          if (data.length === 0) {
+            fileList.innerHTML = `
+              <div class="empty-state">
+                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/92e56853-cd6b-458b-b948-c758408fe359.png" />
+                <p>No files uploaded yet. Upload your first file to get started!</p>
+              </div>
+            `;
+            return;
+          }
+          data.forEach(file => {
+            const li = document.createElement("li");
+            li.innerHTML = `<a href="${file.path}" target="_blank"><span>${file.filename}</span></a>`;
+            fileList.appendChild(li);
+          });
+        });
+    }
+
+    // Initial file list fetch
+    fetchFiles();
   </script>
 </body>
 </html>
