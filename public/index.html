@@ -5,73 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>🚀 Unlimited Drive Upload</title>
   <style>
-    body { font-family: Arial; text-align: center; padding: 20px; background: #f3f3f3; }
-    h1 { color: #3f37c9; }
-    #fileList a { display: block; margin: 5px 0; color: #1e40af; word-break: break-all; }
-    img, audio { margin-top: 10px; max-width: 90%; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 28px;
+    }
+    input[type="file"] {
+      margin: 10px;
+    }
+    .uploaded-links {
+      margin-top: 30px;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    a {
+      word-break: break-all;
+    }
   </style>
 </head>
 <body>
-  <h1>📤 Upload to Unlimited Drive</h1>
-  <input type="file" id="fileInput" />
-  <button onclick="uploadFile()">Upload</button>
-  <div id="message"></div>
 
-  <h2>📁 Uploaded Files</h2>
-  <div id="fileList">Loading...</div>
+  <h1>📤 Upload to Unlimited Drive</h1>
+
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="file" required />
+    <button type="submit">Upload</button>
+  </form>
+
+  <div id="status"></div>
+
+  <div class="uploaded-links">
+    <h2>📁 Uploaded Files</h2>
+    <div id="fileList"></div>
+  </div>
 
   <script>
-    const fileInput = document.getElementById('fileInput');
-    const message = document.getElementById('message');
+    const form = document.getElementById('uploadForm');
+    const status = document.getElementById('status');
     const fileList = document.getElementById('fileList');
 
-    const BACKUP = 'https://drive-main-storage.onrender.com';
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
 
-    async function uploadFile() {
-      const file = fileInput.files[0];
-      if (!file) {
-        message.innerHTML = "❌ Please choose a file!";
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('file', file);
-      message.innerHTML = "⏳ Uploading...";
+      status.innerHTML = '⏳ Uploading...';
 
       try {
-        const res = await fetch('/upload', { method: 'POST', body: formData });
-        const data = await res.json();
-        const filename = data.url.split('/').pop();
-        const fullURL = `${window.location.origin}/drive-files/${filename}`;
-        message.innerHTML = `✅ Uploaded: <a href="${fullURL}" target="_blank">${fullURL}</a>`;
-        fetchFiles();
-      } catch {
-        message.innerHTML = "❌ Upload failed.";
-      }
-    }
-
-    async function fetchFiles() {
-      try {
-        const res = await fetch(`${BACKUP}/files`);
-        const files = await res.json();
-        fileList.innerHTML = "";
-        files.reverse().forEach(f => {
-          const name = f.url.split('/').pop();
-          const proxyURL = `${window.location.origin}/drive-files/${name}`;
-          const link = `<a href="${proxyURL}" target="_blank">${proxyURL}</a>`;
-          const preview = name.endsWith('.jpg') || name.endsWith('.png') || name.endsWith('.jpeg')
-            ? `<img src="${proxyURL}" />`
-            : name.endsWith('.mp3')
-            ? `<audio controls src="${proxyURL}"></audio>`
-            : '';
-          fileList.innerHTML += `${link}<br>${preview}<hr>`;
+        const res = await fetch('/upload', {
+          method: 'POST',
+          body: formData
         });
-      } catch {
-        fileList.innerText = "❌ Failed to load files.";
-      }
-    }
+        const data = await res.json();
 
-    window.onload = fetchFiles;
+        if (data.url) {
+          status.innerHTML = '✅ File uploaded successfully!';
+          const link = document.createElement('a');
+          link.href = data.url;
+          link.target = '_blank';
+          link.textContent = data.url;
+          fileList.prepend(link, document.createElement('br'));
+        } else {
+          status.innerHTML = '❌ Upload failed';
+        }
+      } catch (err) {
+        status.innerHTML = '❌ Error uploading file';
+        console.error(err);
+      }
+
+      form.reset();
+    });
   </script>
+
 </body>
 </html>
