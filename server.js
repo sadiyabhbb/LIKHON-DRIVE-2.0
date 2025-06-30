@@ -8,33 +8,33 @@ const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Serve static frontend (UI)
+// Serve static frontend (e.g. index.html inside /public)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Multer temp storage setup
+// Temp upload folder
 const upload = multer({ dest: 'temp_uploads/' });
 
-// File upload API route
+// Upload route - sends file to Backup Storage
 app.post('/upload', upload.single('file'), async (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
+    return res.status(400).json({ error: '❌ No file uploaded' });
   }
 
   try {
     const form = new FormData();
     form.append('file', fs.createReadStream(req.file.path), req.file.originalname);
 
-    // 🔗 Send to your backup storage
     const response = await axios.post(
       'https://drive-main-storage.onrender.com/upload',
       form,
       { headers: form.getHeaders() }
     );
 
-    // Remove temp file after upload
-    fs.unlinkSync(req.file.path);
+    // Remove the temp file after sending
+    fs.unlink(req.file.path, err => {
+      if (err) console.error('Temp cleanup failed:', err);
+    });
 
-    // Return uploaded file URL
     res.json({
       message: '✅ File uploaded successfully!',
       url: response.data.url
@@ -42,11 +42,24 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
   } catch (err) {
     console.error('Upload error:', err.message);
-    res.status(500).json({ error: '❌ Failed to upload to storage' });
+    res.status(500).json({ error: '❌ Failed to upload to backup storage' });
+  }
+});
+
+// Proxy route: serve backup files without showing backup URL
+app.get('/drive-files/:file', async (req, res) => {
+  const filePath = req.params.file;
+  const backupURL = `https://drive-main-storage.onrender.com/uploads/${filePath}`;
+
+  try {
+    const response = await axios.get(backupURL, { responseType: 'stream' });
+    response.data.pipe(res);
+  } catch (err) {
+    res.status(404).send('❌ File not found in backup');
   }
 });
 
 // Start server
 app.listen(port, () => {
-  console.log(`🚀 Main App running on http://localhost:${port}`);
+  console.log(`🚀 Main App running at http://localhost:${port}`);
 });
