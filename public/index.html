@@ -148,12 +148,20 @@
     async function loadFiles() {
       try {
         const res = await fetch(`${BACKUP_SERVER}/files`);
+        if (!res.ok) throw new Error('Fetch failed');
         const files = await res.json();
+
         const list = document.getElementById('fileList');
         list.innerHTML = '';
 
+        if (!Array.isArray(files) || files.length === 0) {
+          list.innerHTML = '⚠️ কোনো ফাইল পাওয়া যায়নি।';
+          return;
+        }
+
         files.reverse().forEach(file => {
-          const name = file.url.split('/').pop();
+          const name = file.name || (file.url && file.url.split('/').pop()) || 'unknown';
+
           const card = document.createElement('div');
           card.className = 'file-card';
 
@@ -172,8 +180,7 @@
           const delBtn = document.createElement('button');
           delBtn.textContent = '🗑️ ডিলিট';
           delBtn.onclick = async () => {
-            const confirmDelete = confirm('তুমি কি ডিলিট করতে চাও?');
-            if (confirmDelete) {
+            if (confirm('তুমি কি ডিলিট করতে চাও?')) {
               await fetch(`${BACKUP_SERVER}/delete?name=${encodeURIComponent(name)}`, { method: 'DELETE' });
               loadFiles();
             }
@@ -182,7 +189,7 @@
           const renameBtn = document.createElement('button');
           renameBtn.textContent = '✏️ রিনেম';
           renameBtn.onclick = async () => {
-            const newName = prompt('নতুন নাম দিন (একই এক্সটেনশনসহ):', name);
+            const newName = prompt('নতুন নাম দিন (এক্সটেনশনসহ):', name);
             if (newName && newName !== name) {
               await fetch(`${BACKUP_SERVER}/rename`, {
                 method: 'POST',
