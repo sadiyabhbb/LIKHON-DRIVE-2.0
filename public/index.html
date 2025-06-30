@@ -9,13 +9,37 @@
       font-family: sans-serif;
       text-align: center;
       padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #3f37c9;
     }
     #uploadStatus {
-      margin-top: 10px;
+      margin-top: 20px;
       font-weight: bold;
+      color: #1b1b1b;
     }
     a {
       word-break: break-all;
+      color: #1e40af;
+      text-decoration: none;
+    }
+    img {
+      border: 1px solid #ccc;
+      margin-top: 10px;
+      max-width: 90%;
+    }
+    button {
+      padding: 8px 20px;
+      margin-left: 10px;
+      background: #4361ee;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    input[type="file"] {
+      padding: 6px;
     }
   </style>
 </head>
@@ -28,14 +52,9 @@
 
   <div id="uploadStatus"></div>
 
-  <hr/>
-  <h2>📁 Uploaded Files</h2>
-  <div id="preview"></div>
-
   <script>
     const fileInput = document.getElementById("fileInput");
     const uploadStatus = document.getElementById("uploadStatus");
-    const preview = document.getElementById("preview");
 
     async function uploadFile() {
       const file = fileInput.files[0];
@@ -48,19 +67,22 @@
       formData.append("file", file);
 
       try {
-        const res = await fetch("https://drive-main-storage.onrender.com/upload", {
+        const res = await fetch("/upload", {
           method: "POST",
           body: formData,
         });
 
         const data = await res.json();
         if (data.url) {
-          uploadStatus.innerHTML = `✅ File uploaded successfully!<br>
-            <a href="https://drive-main-storage.onrender.com${data.url}" target="_blank">
-              https://drive-main-storage.onrender.com${data.url}
-            </a>`;
+          // Extract filename from /uploads/filename
+          const fileName = data.url.split('/').pop();
+          const fullURL = window.location.origin + "/drive-files/" + fileName;
 
-          loadHistory(); // Reload preview
+          uploadStatus.innerHTML = `
+            ✅ File uploaded successfully!<br/>
+            <a href="${fullURL}" target="_blank">${fullURL}</a><br/>
+            <img src="${fullURL}" alt="preview" />
+          `;
         } else {
           uploadStatus.innerHTML = "❌ Upload failed";
         }
@@ -68,24 +90,6 @@
         uploadStatus.innerHTML = "❌ Error uploading file";
       }
     }
-
-    async function loadHistory() {
-      const res = await fetch("https://drive-main-storage.onrender.com/history");
-      const files = await res.json();
-
-      preview.innerHTML = '';
-      files.reverse().forEach(file => {
-        const fullURL = "https://drive-main-storage.onrender.com" + file.url;
-        preview.innerHTML += `
-          <div style="margin:10px 0">
-            <a href="${fullURL}" target="_blank">${fullURL}</a><br/>
-            <img src="${fullURL}" width="200" style="margin-top:5px;border:1px solid #ccc" />
-          </div>
-        `;
-      });
-    }
-
-    window.onload = loadHistory;
   </script>
 
 </body>
