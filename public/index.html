@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📂 MyDrive - Google Drive Style</title>
+  <title>📂 MyDrive - Advanced</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -20,6 +20,7 @@
       font-weight: bold;
       display: flex;
       align-items: center;
+      justify-content: space-between;
     }
 
     main {
@@ -75,16 +76,36 @@
 
     .file-card {
       background: white;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
       word-break: break-word;
       text-align: center;
+      position: relative;
     }
 
     .file-card a {
       text-decoration: none;
       color: #4285f4;
+      display: block;
+      font-weight: bold;
+    }
+
+    .file-card .icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .actions button {
+      padding: 5px 10px;
+      font-size: 12px;
     }
 
     h2 {
@@ -93,7 +114,10 @@
   </style>
 </head>
 <body>
-  <header>📂 MyDrive</header>
+  <header>
+    📂 MyDrive
+    <span style="font-size: 14px;">(Developed by You 😎)</span>
+  </header>
   <main>
     <div id="uploadSection">
       <form id="uploadForm">
@@ -112,6 +136,15 @@
   <script>
     const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
 
+    const getFileIcon = (filename) => {
+      const ext = filename.split('.').pop().toLowerCase();
+      if (['jpg', 'png', 'jpeg', 'gif'].includes(ext)) return '🖼️';
+      if (['mp4', 'mkv'].includes(ext)) return '🎞️';
+      if (['mp3', 'wav'].includes(ext)) return '🎵';
+      if (['pdf'].includes(ext)) return '📄';
+      return '📁';
+    };
+
     async function loadFiles() {
       try {
         const res = await fetch(`${BACKUP_SERVER}/files`);
@@ -120,16 +153,52 @@
         list.innerHTML = '';
 
         files.reverse().forEach(file => {
-          const div = document.createElement('div');
-          div.className = 'file-card';
+          const name = file.url.split('/').pop();
+          const card = document.createElement('div');
+          card.className = 'file-card';
 
-          const a = document.createElement('a');
-          a.href = file.url;
-          a.target = '_blank';
-          a.textContent = file.url.split('/').pop();
+          const icon = document.createElement('div');
+          icon.className = 'icon';
+          icon.textContent = getFileIcon(name);
 
-          div.appendChild(a);
-          list.appendChild(div);
+          const link = document.createElement('a');
+          link.href = file.url;
+          link.target = '_blank';
+          link.textContent = name;
+
+          const actions = document.createElement('div');
+          actions.className = 'actions';
+
+          const delBtn = document.createElement('button');
+          delBtn.textContent = '🗑️ ডিলিট';
+          delBtn.onclick = async () => {
+            const confirmDelete = confirm('তুমি কি ডিলিট করতে চাও?');
+            if (confirmDelete) {
+              await fetch(`${BACKUP_SERVER}/delete?name=${encodeURIComponent(name)}`, { method: 'DELETE' });
+              loadFiles();
+            }
+          };
+
+          const renameBtn = document.createElement('button');
+          renameBtn.textContent = '✏️ রিনেম';
+          renameBtn.onclick = async () => {
+            const newName = prompt('নতুন নাম দিন (একই এক্সটেনশনসহ):', name);
+            if (newName && newName !== name) {
+              await fetch(`${BACKUP_SERVER}/rename`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldName: name, newName })
+              });
+              loadFiles();
+            }
+          };
+
+          actions.appendChild(renameBtn);
+          actions.appendChild(delBtn);
+          card.appendChild(icon);
+          card.appendChild(link);
+          card.appendChild(actions);
+          list.appendChild(card);
         });
       } catch (err) {
         document.getElementById('fileList').innerHTML = '❌ ফাইল লোড করা যায়নি।';
