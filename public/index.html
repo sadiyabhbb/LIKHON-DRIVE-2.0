@@ -33,14 +33,20 @@
     }
 
     .dropdown {
-      position: absolute;
-      top: 60px;
-      right: 20px;
+      position: fixed;
+      top: 70px;
+      right: -220px;
+      width: 200px;
       background: #1e1e1e;
       border: 1px solid #333;
-      border-radius: 8px;
-      display: none;
-      z-index: 100;
+      border-radius: 8px 0 0 8px;
+      box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      transition: right 0.3s ease-in-out;
+    }
+
+    .dropdown.show {
+      right: 10px;
     }
 
     .dropdown button {
@@ -244,12 +250,11 @@
 
   <script>
     const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
-
     localStorage.removeItem('filterType');
 
     function toggleDropdown() {
       const menu = document.getElementById('dropdownMenu');
-      menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+      menu.classList.toggle('show');
     }
 
     function setFilter(type) {
