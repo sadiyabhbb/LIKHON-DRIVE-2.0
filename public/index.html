@@ -274,13 +274,11 @@
     const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
 
     function toggleDropdown() {
-      const menu = document.getElementById('dropdownMenu');
-      menu.classList.toggle('show');
+      document.getElementById('dropdownMenu').classList.toggle('show');
     }
 
     function setFilter(type) {
       localStorage.setItem('filterType', type);
-
       document.getElementById("homeIntro").style.display = "none";
       document.getElementById("fileList").style.display = "grid";
       document.getElementById("uploadedTitle").style.display = "block";
@@ -415,12 +413,12 @@
     });
 
     const terminalLines = [
-      "📦 Python v3.11.3",
-      "🔧 Flask server active at 127.0.0.1:5000",
-      "📁 Storage mounted at /user/data/mydrive/",
-      "🚀 Uptime: 1 day 03:12:47",
-      "🧠 Memory Usage: 123.6 MB",
-      "🌐 API Endpoint: /upload, /files, /delete, /rename"
+      "{",
+      '  "name": "mydrive",',
+      '  "version": "1.0.0",',
+      '  "author": "Abdur Rahim",',
+      '  "uptime": "1 day 04:23:59"',
+      "}"
     ];
 
     const terminal = document.getElementById("terminalOutput");
@@ -436,7 +434,7 @@
           terminal.textContent += "\n";
           line++;
           char = 0;
-          setTimeout(typeLine, 200);
+          setTimeout(typeLine, 150);
         }
       }
     }
