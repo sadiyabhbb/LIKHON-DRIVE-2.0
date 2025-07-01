@@ -10,6 +10,7 @@
       background: #f5f5f5;
       margin: 0;
       padding: 0;
+      color: #333;
     }
 
     header {
@@ -21,6 +22,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
     .menu {
@@ -75,6 +77,8 @@
     input[type="file"] {
       flex: 1;
       padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
     }
 
     button {
@@ -85,10 +89,6 @@
       border-radius: 5px;
       cursor: pointer;
       font-weight: bold;
-    }
-
-    button:hover {
-      background-color: #3367d6;
     }
 
     progress {
@@ -114,21 +114,19 @@
       padding: 15px;
       border-radius: 10px;
       box-shadow: 0 1px 5px rgba(0,0,0,0.1);
-      word-break: break-word;
       text-align: center;
-      position: relative;
-    }
-
-    .file-card a {
-      text-decoration: none;
-      color: #4285f4;
-      display: block;
-      font-weight: bold;
     }
 
     .file-card .icon {
       font-size: 30px;
       margin-bottom: 10px;
+    }
+
+    .file-card a {
+      color: #4285f4;
+      text-decoration: none;
+      display: block;
+      font-weight: bold;
     }
 
     .actions {
@@ -141,10 +139,19 @@
     .actions button {
       padding: 5px 10px;
       font-size: 12px;
+      background-color: #f1f1f1;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .actions button:hover {
+      background-color: #ddd;
     }
 
     h2 {
       margin-top: 40px;
+      font-size: 26px;
+      color: #4285f4;
     }
   </style>
 </head>
@@ -160,6 +167,7 @@
       <button onclick="setFilter('all')">✅ সকল ফাইল</button>
     </div>
   </header>
+
   <main>
     <div id="uploadSection">
       <form id="uploadForm">
@@ -178,39 +186,39 @@
   <script>
     const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
 
+    const fileTypes = {
+      images: ['jpg', 'jpeg', 'png', 'gif'],
+      videos: ['mp4', 'mkv'],
+      audios: ['mp3', 'wav'],
+      docs: ['pdf', 'doc', 'docx']
+    };
+
     const getFileIcon = (filename) => {
       const ext = filename.split('.').pop().toLowerCase();
-      if (["jpg", "png", "jpeg", "gif"].includes(ext)) return "🖼️";
-      if (["mp4", "mkv"].includes(ext)) return "🎞️";
-      if (["mp3", "wav"].includes(ext)) return "🎵";
-      if (["pdf", "doc", "docx"].includes(ext)) return "📄";
-      return "📁";
+      if (fileTypes.images.includes(ext)) return '🖼️';
+      if (fileTypes.videos.includes(ext)) return '🎞️';
+      if (fileTypes.audios.includes(ext)) return '🎵';
+      if (fileTypes.docs.includes(ext)) return '📄';
+      return '📁';
     };
 
     function toggleDropdown() {
-      const menu = document.getElementById('dropdownMenu');
-      menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+      const dropdown = document.getElementById('dropdownMenu');
+      dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     }
 
     function setFilter(type) {
       localStorage.setItem('filterType', type);
-      location.reload();
+      loadFiles(); // No reload, just reload files
     }
 
     async function loadFiles() {
       try {
         const res = await fetch(`${BACKUP_SERVER}/files`);
         const files = await res.json();
-        const list = document.getElementById('fileList');
         const filter = localStorage.getItem('filterType') || 'all';
+        const list = document.getElementById('fileList');
         list.innerHTML = '';
-
-        const fileFilter = {
-          images: ["jpg", "png", "jpeg", "gif"],
-          videos: ["mp4", "mkv"],
-          audios: ["mp3", "wav"],
-          docs: ["pdf", "doc", "docx"]
-        };
 
         files.reverse().forEach(file => {
           const name = file.name;
@@ -218,7 +226,7 @@
           const ext = name.split('.').pop().toLowerCase();
 
           if (name === '.gitkeep') return;
-          if (filter !== 'all' && !fileFilter[filter].includes(ext)) return;
+          if (filter !== 'all' && !fileTypes[filter].includes(ext)) return;
 
           const card = document.createElement('div');
           card.className = 'file-card';
@@ -235,20 +243,10 @@
           const actions = document.createElement('div');
           actions.className = 'actions';
 
-          const delBtn = document.createElement('button');
-          delBtn.textContent = '🗑️ ডিলিট';
-          delBtn.onclick = async () => {
-            const confirmDelete = confirm('তুমি কি ডিলিট করতে চাও?');
-            if (confirmDelete) {
-              await fetch(`${BACKUP_SERVER}/delete?path=${encodeURIComponent(path)}`, { method: 'DELETE' });
-              loadFiles();
-            }
-          };
-
           const renameBtn = document.createElement('button');
           renameBtn.textContent = '✏️ রিনেম';
           renameBtn.onclick = async () => {
-            const newName = prompt('নতুন নাম দিন (একই এক্সটেনশনসহ):', name);
+            const newName = prompt('নতুন নাম দিন:', name);
             if (newName && newName !== name) {
               await fetch(`${BACKUP_SERVER}/rename`, {
                 method: 'POST',
@@ -259,54 +257,55 @@
             }
           };
 
+          const deleteBtn = document.createElement('button');
+          deleteBtn.textContent = '🗑️ ডিলিট';
+          deleteBtn.onclick = async () => {
+            const confirmDelete = confirm('তুমি কি ডিলিট করতে চাও?');
+            if (confirmDelete) {
+              await fetch(`${BACKUP_SERVER}/delete?path=${encodeURIComponent(path)}`, {
+                method: 'DELETE'
+              });
+              loadFiles();
+            }
+          };
+
           actions.appendChild(renameBtn);
-          actions.appendChild(delBtn);
+          actions.appendChild(deleteBtn);
           card.appendChild(icon);
           card.appendChild(link);
           card.appendChild(actions);
           list.appendChild(card);
         });
-      } catch (err) {
+      } catch {
         document.getElementById('fileList').innerHTML = '❌ ফাইল লোড করা যায়নি।';
       }
     }
 
     document.getElementById('uploadForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
+      const formData = new FormData(e.target);
 
       const status = document.getElementById('status');
       const progressBar = document.getElementById('progressBar');
-
       progressBar.style.display = 'block';
       progressBar.value = 0;
       status.textContent = 'আপলোড হচ্ছে...';
 
       const xhr = new XMLHttpRequest();
-
-      xhr.upload.onprogress = function(event) {
-        if (event.lengthComputable) {
-          const percent = (event.loaded / event.total) * 100;
-          progressBar.value = percent;
+      xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+          progressBar.value = (e.loaded / e.total) * 100;
         }
       };
 
       xhr.onload = async function() {
+        progressBar.style.display = 'none';
         if (xhr.status === 200) {
-          const data = JSON.parse(xhr.responseText);
-          if (data.url) {
-            status.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
-            progressBar.style.display = 'none';
-            form.reset();
-            await loadFiles();
-          } else {
-            status.textContent = '❌ আপলোড ব্যর্থ হয়েছে!';
-            progressBar.style.display = 'none';
-          }
+          status.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
+          e.target.reset();
+          loadFiles();
         } else {
           status.textContent = '❌ আপলোড ব্যর্থ হয়েছে!';
-          progressBar.style.display = 'none';
         }
       };
 
@@ -319,6 +318,7 @@
       xhr.send(formData);
     });
 
+    // Initial load
     loadFiles();
   </script>
 </body>
