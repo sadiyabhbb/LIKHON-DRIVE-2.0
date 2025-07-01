@@ -192,9 +192,9 @@
 
   <main>
     <div id="homeIntro">
-      <h1>📁 আমার ড্রাইভে স্বাগতম</h1>
+      <h1>📁 MyDrive এ স্বাগতম</h1>
       <p>এখানে আপনি আপনার প্রয়োজনীয় ফাইল আপলোড করে রাখতে পারবেন।</p>
-      <p>যোগাযোগ: <a href="mailto:your@email.com">your@email.com</a></p>
+      <p>যোগাযোগ: <a href="mailto:you@example.com">you@example.com</a></p>
     </div>
 
     <div id="uploadSection">
@@ -228,16 +228,22 @@
       menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
     }
 
+    function showHomepage() {
+      document.getElementById('homeIntro').style.display = 'block';
+      document.getElementById('uploadSection').style.display = 'none';
+      document.querySelector('h2').style.display = 'none';
+      document.getElementById('fileList').innerHTML = '';
+      document.getElementById('status').textContent = '';
+      document.getElementById('progressBar').style.display = 'none';
+    }
+
     function setFilter(type) {
       localStorage.setItem('filterType', type);
       document.getElementById("fileList").innerHTML = "🔄 লোড হচ্ছে...";
 
-      const showDriveUI = type !== '';
-
-      document.querySelector('header').style.display = showDriveUI ? 'flex' : 'none';
-      document.getElementById('uploadSection').style.display = showDriveUI ? 'flex' : 'none';
-      document.querySelector('h2').style.display = showDriveUI ? 'block' : 'none';
-      document.getElementById('homeIntro').style.display = showDriveUI ? 'none' : 'block';
+      document.getElementById('homeIntro').style.display = 'none';
+      document.getElementById('uploadSection').style.display = 'flex';
+      document.querySelector('h2').style.display = 'block';
 
       loadFiles();
     }
@@ -264,7 +270,7 @@
           const ext = name.split('.').pop().toLowerCase();
 
           if (name === '.gitkeep') return;
-          if (filter !== 'all' && filter !== '' && !fileFilter[filter].includes(ext)) return;
+          if (filter !== 'all' && !fileFilter[filter].includes(ext)) return;
 
           const card = document.createElement('div');
           card.className = 'file-card';
@@ -356,8 +362,12 @@
     });
 
     window.onload = () => {
-      const filter = localStorage.getItem('filterType') || '';
-      setFilter(filter); // Homepage view initially
+      const filter = localStorage.getItem('filterType');
+      if (filter) {
+        setFilter(filter);
+      } else {
+        showHomepage();
+      }
     };
   </script>
 </body>
