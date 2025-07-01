@@ -5,97 +5,192 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>📂 MyDrive</title>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #eee; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: #eee;
+      margin: 0;
+      padding: 0;
+    }
+
     header {
-      background: #1e1e1e; color: #fff; padding: 15px 30px;
-      font-size: 24px; font-weight: bold;
-      display: flex; align-items: center;
+      background-color: #1e1e1e;
+      color: #fff;
+      padding: 15px 30px;
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
       justify-content: space-between;
       box-shadow: 0 2px 5px rgba(0,0,0,0.5);
       position: relative;
     }
-    .menu { font-size: 24px; cursor: pointer; padding: 0 10px; }
 
-    /* Updated dropdown CSS for right-slide */
-    .dropdown {
-      position: absolute; top: 60px; right: 20px;
-      background: #1e1e1e; border: 1px solid #333;
-      border-radius: 8px; width: 180px;
-      transform: translateX(100%);
-      opacity: 0;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-      pointer-events: none;
-      z-index: 100;
+    .menu {
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0 10px;
     }
-    .dropdown.show {
-      transform: translateX(0);
-      opacity: 1;
-      pointer-events: auto;
+
+    .dropdown {
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      display: none;
+      z-index: 100;
     }
 
     .dropdown button {
-      color: #eee; padding: 10px 20px;
-      background: none; border: none;
-      width: 100%; text-align: left;
+      color: #eee;
+      padding: 10px 20px;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
       cursor: pointer;
     }
-    .dropdown button:hover { background: #333; }
 
-    /* Rest of existing styles (lights, cards, etc.) */
-    main { padding: 20px; }
+    .dropdown button:hover {
+      background: #333;
+    }
+
+    main {
+      padding: 20px;
+    }
+
     #homeIntro {
-      background: #1e1e1e; padding: 30px;
+      background: #1e1e1e;
+      padding: 30px;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      margin-bottom: 30px; text-align: center;
+      margin-bottom: 30px;
+      text-align: center;
       position: relative;
     }
-    .lights { position: absolute; top: 10px; left: 10px; display: flex; gap: 5px; }
-    .light { width: 12px; height: 12px; border-radius: 50%; }
-    .red {background: #ff5f56;} .yellow {background: #ffbd2e;} .green {background: #27c93f;}
+
+    .lights {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      gap: 5px;
+    }
+
+    .light {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .red { background: #ff5f56; }
+    .yellow { background: #ffbd2e; }
+    .green { background: #27c93f; }
+
     .sys-info {
-      font-family: monospace; background: #111;
-      color: #00ff00; font-size: 13px;
-      padding: 10px; border-radius: 6px;
-      margin-top: 20px; text-align: left;
+      font-family: monospace;
+      background: #111;
+      color: #00ff00;
+      font-size: 13px;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 20px;
+      text-align: left;
       white-space: pre-line;
       box-shadow: 0 1px 4px rgba(0,255,0,0.2);
     }
 
     #uploadSection {
-      background: #1e1e1e; padding: 20px;
+      background: #1e1e1e;
+      padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      display: none; flex-wrap: wrap; align-items: center; gap: 10px;
+      display: none;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
     }
+
     input[type="file"] {
-      flex: 1; background: #333;
-      border: 1px solid #444; color: #eee;
-      padding: 8px; border-radius: 5px;
+      flex: 1;
+      background: #333;
+      border: 1px solid #444;
+      color: #eee;
+      padding: 8px;
+      border-radius: 5px;
     }
+
     button {
-      background-color: #3a81f1; color: white;
-      border: none; padding: 10px 15px;
-      border-radius: 5px; cursor: pointer;
+      background-color: #3a81f1;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
     }
-    button:hover { background-color: #2c6adf; }
-    progress { width:100%; height:15px; display:none; margin-top:10px; }
-    #fileList { display:none; grid-template-columns: repeat(auto-fill, minmax(250px,1fr)); gap:15px; }
+
+    button:hover {
+      background-color: #2c6adf;
+    }
+
+    progress {
+      width: 100%;
+      height: 15px;
+      display: none;
+      margin-top: 10px;
+    }
+
+    #fileList {
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
     .file-card {
-      background: #1e1e1e; padding:15px; border-radius:10px;
-      box-shadow:0 1px 5px rgba(0,0,0,0.4);
-      word-break:break-word; text-align:center;
+      background: #1e1e1e;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+      word-break: break-word;
+      text-align: center;
     }
-    .file-card .icon { font-size:30px; margin-bottom:10px; }
-    .file-card a { text-decoration:none; color:#3a81f1; }
-    .actions { margin-top:10px; display:flex; justify-content:center; gap:10px; }
+
+    .file-card .icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .file-card a {
+      text-decoration: none;
+      color: #3a81f1;
+    }
+
+    .actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
     .actions button {
-      padding:5px 10px; font-size:12px;
-      background:#333; color:white;
-      border:none; border-radius:5px;
+      padding: 5px 10px;
+      font-size: 12px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 5px;
     }
-    .actions button:hover { background:#444; }
-    h2 { color:#3a81f1; margin-top:40px; }
+
+    .actions button:hover {
+      background: #444;
+    }
+
+    h2 {
+      color: #3a81f1;
+      margin-top: 40px;
+    }
   </style>
 </head>
 <body>
@@ -133,25 +228,159 @@
       </div>
     </div>
 
-    <!-- Upload & Filelist sections remain same -->
+    <div id="uploadSection">
+      <form id="uploadForm">
+        <input type="file" name="file" required />
+        <button type="submit">আপলোড</button>
+      </form>
+    </div>
 
+    <progress id="progressBar" value="0" max="100"></progress>
+    <p id="status"></p>
+
+    <h2 id="uploadedTitle" style="display:none;">আপলোডকৃত ফাইলসমূহ</h2>
+    <div id="fileList">🔄 লোড হচ্ছে...</div>
   </main>
 
   <script>
     const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
-    // Toggle show class, no direct display style
+
+    localStorage.removeItem('filterType');
+
     function toggleDropdown() {
-      document.getElementById('dropdownMenu').classList.toggle('show');
+      const menu = document.getElementById('dropdownMenu');
+      menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
     }
-    // Close on outside click
-    window.addEventListener('click', function(e) {
-      const dd = document.getElementById('dropdownMenu');
-      const btn = document.querySelector('.menu');
-      if (!btn.contains(e.target) && !dd.contains(e.target)) {
-        dd.classList.remove('show');
+
+    function setFilter(type) {
+      localStorage.setItem('filterType', type);
+      document.getElementById("fileList").style.display = "grid";
+      document.getElementById("uploadedTitle").style.display = "block";
+      document.getElementById("uploadSection").style.display = "flex";
+      document.getElementById("homeIntro").style.display = "none";
+      document.getElementById("fileList").innerHTML = "🔄 লোড হচ্ছে...";
+      loadFiles();
+    }
+
+    async function loadFiles() {
+      try {
+        const res = await fetch(`${BACKUP_SERVER}/files`);
+        const files = await res.json();
+        const list = document.getElementById('fileList');
+        const filter = localStorage.getItem('filterType') || 'all';
+
+        const fileFilter = {
+          images: ["jpg", "jpeg", "png", "gif"],
+          videos: ["mp4", "mkv"],
+          audios: ["mp3", "wav"],
+          docs: ["pdf", "doc", "docx"]
+        };
+
+        list.innerHTML = '';
+
+        files.reverse().forEach(file => {
+          const name = file.name;
+          const path = file.path;
+          const ext = name.split('.').pop().toLowerCase();
+          if (name === '.gitkeep') return;
+          if (filter !== 'all' && !fileFilter[filter].includes(ext)) return;
+
+          const card = document.createElement('div');
+          card.className = 'file-card';
+
+          const icon = document.createElement('div');
+          icon.className = 'icon';
+          icon.textContent = getFileIcon(name);
+
+          const link = document.createElement('a');
+          link.href = file.url;
+          link.target = '_blank';
+          link.textContent = name;
+
+          const actions = document.createElement('div');
+          actions.className = 'actions';
+
+          const delBtn = document.createElement('button');
+          delBtn.textContent = '🗑️ ডিলিট';
+          delBtn.onclick = async () => {
+            if (confirm('তুমি কি ডিলিট করতে চাও?')) {
+              await fetch(`${BACKUP_SERVER}/delete?path=${encodeURIComponent(path)}`, { method: 'DELETE' });
+              loadFiles();
+            }
+          };
+
+          const renameBtn = document.createElement('button');
+          renameBtn.textContent = '✏️ রিনেম';
+          renameBtn.onclick = async () => {
+            const newName = prompt('নতুন নাম দিন:', name);
+            if (newName && newName !== name) {
+              await fetch(`${BACKUP_SERVER}/rename`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPath: path, newPath: newName })
+              });
+              loadFiles();
+            }
+          };
+
+          actions.appendChild(renameBtn);
+          actions.appendChild(delBtn);
+          card.appendChild(icon);
+          card.appendChild(link);
+          card.appendChild(actions);
+          list.appendChild(card);
+        });
+      } catch {
+        document.getElementById("fileList").innerHTML = '❌ ফাইল লোড করা যায়নি!';
       }
+    }
+
+    function getFileIcon(filename) {
+      const ext = filename.split('.').pop().toLowerCase();
+      if (["jpg", "jpeg", "png", "gif"].includes(ext)) return "🖼️";
+      if (["mp4", "mkv"].includes(ext)) return "🎞️";
+      if (["mp3", "wav"].includes(ext)) return "🎵";
+      if (["pdf", "doc", "docx"].includes(ext)) return "📄";
+      return "📁";
+    }
+
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const status = document.getElementById('status');
+      const progressBar = document.getElementById('progressBar');
+
+      progressBar.style.display = 'block';
+      progressBar.value = 0;
+      status.textContent = 'আপলোড হচ্ছে...';
+
+      const xhr = new XMLHttpRequest();
+      xhr.upload.onprogress = function(event) {
+        if (event.lengthComputable) {
+          progressBar.value = (event.loaded / event.total) * 100;
+        }
+      };
+      xhr.onload = async function() {
+        if (xhr.status === 200) {
+          const data = JSON.parse(xhr.responseText);
+          if (data.url) {
+            status.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
+            progressBar.style.display = 'none';
+            e.target.reset();
+            await loadFiles();
+          } else {
+            status.textContent = '❌ আপলোড ব্যর্থ হয়েছে!';
+            progressBar.style.display = 'none';
+          }
+        }
+      };
+      xhr.onerror = () => {
+        status.textContent = '❌ আপলোডে সমস্যা হয়েছে!';
+        progressBar.style.display = 'none';
+      };
+      xhr.open('POST', `${BACKUP_SERVER}/upload`);
+      xhr.send(formData);
     });
-    // Remaining functions unchanged...
   </script>
 </body>
 </html>
