@@ -1,364 +1,385 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📂 MyDrive</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #121212;
-      color: #eee;
-      margin: 0;
-      padding: 0;
-    }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>📂 MyDrive</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: #eee;
+      margin: 0;
+      padding: 0;
+    }
 
-    header {
-      background-color: #1e1e1e;
-      color: #fff;
-      padding: 15px 30px;
-      font-size: 24px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    }
+    header {
+      background-color: #1e1e1e;
+      color: #fff;
+      padding: 15px 30px;
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+      position: relative;
+    }
 
-    .menu {
-      font-size: 24px;
-      cursor: pointer;
-      padding: 0 10px;
-    }
+    .menu {
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0 10px;
+    }
 
-    .dropdown {
-      position: absolute;
-      top: 60px;
-      right: 10px;
-      background: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 8px;
-      display: none;
-      z-index: 10;
-    }
+    .dropdown {
+      position: absolute;
+      top: 60px;
+      right: 10px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+      transition: all 0.2s ease-in-out;
+      z-index: 10;
+    }
 
-    .dropdown button {
-      color: #eee;
-      padding: 10px 20px;
-      background: none;
-      border: none;
-      width: 100%;
-      text-align: left;
-      cursor: pointer;
-    }
+    .dropdown.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
 
-    .dropdown button:hover {
-      background: #333;
-    }
+    .dropdown button {
+      color: #eee;
+      padding: 10px 20px;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+    }
 
-    main {
-      padding: 20px;
-    }
+    .dropdown button:hover {
+      background: #333;
+    }
 
-    #homeIntro {
-      background: #1e1e1e;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      margin-bottom: 30px;
-      text-align: center;
-      position: relative;
-    }
+    main {
+      padding: 20px;
+    }
 
-    .lights {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      display: flex;
-      gap: 5px;
-    }
+    #homeIntro {
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      margin-bottom: 30px;
+      text-align: center;
+      position: relative;
+    }
 
-    .light {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-    }
+    .lights {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      gap: 5px;
+    }
 
-    .red { background: #ff5f56; }
-    .yellow { background: #ffbd2e; }
-    .green { background: #27c93f; }
+    .light {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
 
-    #uploadSection {
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      display: none;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-    }
+    .red { background: #ff5f56; }
+    .yellow { background: #ffbd2e; }
+    .green { background: #27c93f; }
 
-    input[type="file"] {
-      flex: 1;
-      background: #333;
-      border: 1px solid #444;
-      color: #eee;
-      padding: 8px;
-      border-radius: 5px;
-    }
+    #uploadSection {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      display: none;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
 
-    button {
-      background-color: #3a81f1;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+    input[type="file"] {
+      flex: 1;
+      background: #333;
+      border: 1px solid #444;
+      color: #eee;
+      padding: 8px;
+      border-radius: 5px;
+    }
 
-    button:hover {
-      background-color: #2c6adf;
-    }
+    button {
+      background-color: #3a81f1;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-    progress {
-      width: 100%;
-      height: 15px;
-      display: none;
-      margin-top: 10px;
-    }
+    button:hover {
+      background-color: #2c6adf;
+    }
 
-    #fileList {
-      display: none;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 15px;
-    }
+    progress {
+      width: 100%;
+      height: 15px;
+      display: none;
+      margin-top: 10px;
+    }
 
-    .file-card {
-      background: #1e1e1e;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-      word-break: break-word;
-      text-align: center;
-    }
+    #fileList {
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+    }
 
-    .file-card .icon {
-      font-size: 30px;
-      margin-bottom: 10px;
-    }
+    .file-card {
+      background: #1e1e1e;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+      word-break: break-word;
+      text-align: center;
+    }
 
-    .file-card a {
-      text-decoration: none;
-      color: #3a81f1;
-    }
+    .file-card .icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
 
-    .actions {
-      margin-top: 10px;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
+    .file-card a {
+      text-decoration: none;
+      color: #3a81f1;
+    }
 
-    .actions button {
-      padding: 5px 10px;
-      font-size: 12px;
-      background: #333;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
+    .actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
 
-    .actions button:hover {
-      background: #444;
-    }
+    .actions button {
+      padding: 5px 10px;
+      font-size: 12px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
 
-    h2 {
-      color: #3a81f1;
-      margin-top: 40px;
-    }
-  </style>
+    .actions button:hover {
+      background: #444;
+    }
+
+    h2 {
+      color: #3a81f1;
+      margin-top: 40px;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    📂 MyDrive
-    <div class="menu" onclick="toggleDropdown()">☰</div>
-    <div class="dropdown" id="dropdownMenu">
-      <button onclick="setFilter('images')">🖼️ ফটো</button>
-      <button onclick="setFilter('videos')">🎞️ ভিডিও</button>
-      <button onclick="setFilter('audios')">🎵 অডিও</button>
-      <button onclick="setFilter('docs')">📄 ডকুমেন্ট</button>
-      <button onclick="setFilter('all')">✅ সকল ফাইল</button>
-    </div>
-  </header>
+  <header>
+    📂 MyDrive
+    <div class="menu" onclick="toggleDropdown()">☰</div>
+    <div class="dropdown" id="dropdownMenu">
+      <button onclick="setFilter('images')">🖼️ ফটো</button>
+      <button onclick="setFilter('videos')">🎞️ ভিডিও</button>
+      <button onclick="setFilter('audios')">🎵 অডিও</button>
+      <button onclick="setFilter('docs')">📄 ডকুমেন্ট</button>
+      <button onclick="setFilter('all')">✅ সকল ফাইল</button>
+    </div>
+  </header>
 
-  <main>
-    <div id="homeIntro">
-      <div class="lights">
-        <div class="light red"></div>
-        <div class="light yellow"></div>
-        <div class="light green"></div>
-      </div>
-      <h1>📁 MyDrive এ স্বাগতম</h1>
-      <p>এটি একটি পার্সোনাল ড্রাইভ যেখানে আপনি আপনার ফাইল সংরক্ষণ করতে পারেন।</p>
-      <p>💻 Technologies Used: Node.js, Express, JSON Storage</p>
-      <p>📧 যোগাযোগ: admin@mydrive.com</p>
-    </div>
+  <main>
+    <div id="homeIntro">
+      <div class="lights">
+        <div class="light red"></div>
+        <div class="light yellow"></div>
+        <div class="light green"></div>
+      </div>
+      <h1>📁 MyDrive এ স্বাগতম</h1>
+      <p>এটি একটি পার্সোনাল ড্রাইভ যেখানে আপনি আপনার ফাইল সংরক্ষণ করতে পারেন।</p>
+      <p>💻 Technologies Used: Node.js, Express, JSON Storage</p>
+      <p>📧 যোগাযোগ: admin@mydrive.com</p>
+    </div>
 
-    <div id="uploadSection">
-      <form id="uploadForm">
-        <input type="file" name="file" required />
-        <button type="submit">আপলোড</button>
-      </form>
-    </div>
+    <div id="uploadSection">
+      <form id="uploadForm">
+        <input type="file" name="file" required />
+        <button type="submit">আপলোড</button>
+      </form>
+    </div>
 
-    <progress id="progressBar" value="0" max="100"></progress>
-    <p id="status"></p>
+    <progress id="progressBar" value="0" max="100"></progress>
+    <p id="status"></p>
 
-    <h2 id="uploadedTitle" style="display:none;">আপলোডকৃত ফাইলসমূহ</h2>
-    <div id="fileList">🔄 লোড হচ্ছে...</div>
-  </main>
+    <h2 id="uploadedTitle" style="display:none;">আপলোডকৃত ফাইলসমূহ</h2>
+    <div id="fileList">🔄 লোড হচ্ছে...</div>
+  </main>
 
-  <script>
-    const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
+  <script>
+    const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
 
-    localStorage.removeItem('filterType');
+    function toggleDropdown() {
+      const menu = document.getElementById('dropdownMenu');
+      menu.classList.toggle('show');
+    }
 
-    function toggleDropdown() {
-      const menu = document.getElementById('dropdownMenu');
-      menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-    }
+    window.addEventListener('click', function(e) {
+      const menuBtn = document.querySelector('.menu');
+      const dropdown = document.getElementById('dropdownMenu');
+      if (!menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('show');
+      }
+    });
 
-    function setFilter(type) {
-      localStorage.setItem('filterType', type);
-      document.getElementById("fileList").style.display = "grid";
-      document.getElementById("uploadedTitle").style.display = "block";
-      document.getElementById("uploadSection").style.display = "flex";
-      document.getElementById("homeIntro").style.display = "none";
-      document.getElementById("fileList").innerHTML = "🔄 লোড হচ্ছে...";
-      loadFiles();
-    }
+    function setFilter(type) {
+      localStorage.setItem('filterType', type);
+      document.getElementById("fileList").style.display = "grid";
+      document.getElementById("uploadedTitle").style.display = "block";
+      document.getElementById("uploadSection").style.display = "flex";
+      document.getElementById("homeIntro").style.display = "none";
+      document.getElementById("fileList").innerHTML = "🔄 লোড হচ্ছে...";
+      loadFiles();
+    }
 
-    async function loadFiles() {
-      try {
-        const res = await fetch(`${BACKUP_SERVER}/files`);
-        const files = await res.json();
-        const list = document.getElementById('fileList');
-        const filter = localStorage.getItem('filterType') || 'all';
+    async function loadFiles() {
+      try {
+        const res = await fetch(`${BACKUP_SERVER}/files`);
+        const files = await res.json();
+        const list = document.getElementById('fileList');
+        const filter = localStorage.getItem('filterType') || 'all';
 
-        const fileFilter = {
-          images: ["jpg", "jpeg", "png", "gif"],
-          videos: ["mp4", "mkv"],
-          audios: ["mp3", "wav"],
-          docs: ["pdf", "doc", "docx"]
-        };
+        const fileFilter = {
+          images: ["jpg", "jpeg", "png", "gif"],
+          videos: ["mp4", "mkv"],
+          audios: ["mp3", "wav"],
+          docs: ["pdf", "doc", "docx"]
+        };
 
-        list.innerHTML = '';
+        list.innerHTML = '';
 
-        files.reverse().forEach(file => {
-          const name = file.name;
-          const path = file.path;
-          const ext = name.split('.').pop().toLowerCase();
-          if (name === '.gitkeep') return;
-          if (filter !== 'all' && !fileFilter[filter].includes(ext)) return;
+        files.reverse().forEach(file => {
+          const name = file.name;
+          const path = file.path;
+          const ext = name.split('.').pop().toLowerCase();
+          if (name === '.gitkeep') return;
+          if (filter !== 'all' && !fileFilter[filter].includes(ext)) return;
 
-          const card = document.createElement('div');
-          card.className = 'file-card';
+          const card = document.createElement('div');
+          card.className = 'file-card';
 
-          const icon = document.createElement('div');
-          icon.className = 'icon';
-          icon.textContent = getFileIcon(name);
+          const icon = document.createElement('div');
+          icon.className = 'icon';
+          icon.textContent = getFileIcon(name);
 
-          const link = document.createElement('a');
-          link.href = file.url;
-          link.target = '_blank';
-          link.textContent = name;
+          const link = document.createElement('a');
+          link.href = file.url;
+          link.target = '_blank';
+          link.textContent = name;
 
-          const actions = document.createElement('div');
-          actions.className = 'actions';
+          const actions = document.createElement('div');
+          actions.className = 'actions';
 
-          const delBtn = document.createElement('button');
-          delBtn.textContent = '🗑️ ডিলিট';
-          delBtn.onclick = async () => {
-            if (confirm('তুমি কি ডিলিট করতে চাও?')) {
-              await fetch(`${BACKUP_SERVER}/delete?path=${encodeURIComponent(path)}`, { method: 'DELETE' });
-              loadFiles();
-            }
-          };
+          const delBtn = document.createElement('button');
+          delBtn.textContent = '🗑️ ডিলিট';
+          delBtn.onclick = async () => {
+            if (confirm('তুমি কি ডিলিট করতে চাও?')) {
+              await fetch(`${BACKUP_SERVER}/delete?path=${encodeURIComponent(path)}`, { method: 'DELETE' });
+              loadFiles();
+            }
+          };
 
-          const renameBtn = document.createElement('button');
-          renameBtn.textContent = '✏️ রিনেম';
-          renameBtn.onclick = async () => {
-            const newName = prompt('নতুন নাম দিন:', name);
-            if (newName && newName !== name) {
-              await fetch(`${BACKUP_SERVER}/rename`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ oldPath: path, newPath: newName })
-              });
-              loadFiles();
-            }
-          };
+          const renameBtn = document.createElement('button');
+          renameBtn.textContent = '✏️ রিনেম';
+          renameBtn.onclick = async () => {
+            const newName = prompt('নতুন নাম দিন:', name);
+            if (newName && newName !== name) {
+              await fetch(`${BACKUP_SERVER}/rename`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPath: path, newPath: newName })
+              });
+              loadFiles();
+            }
+          };
 
-          actions.appendChild(renameBtn);
-          actions.appendChild(delBtn);
-          card.appendChild(icon);
-          card.appendChild(link);
-          card.appendChild(actions);
-          list.appendChild(card);
-        });
-      } catch {
-        document.getElementById("fileList").innerHTML = '❌ ফাইল লোড করা যায়নি!';
-      }
-    }
+          actions.appendChild(renameBtn);
+          actions.appendChild(delBtn);
+          card.appendChild(icon);
+          card.appendChild(link);
+          card.appendChild(actions);
+          list.appendChild(card);
+        });
+      } catch {
+        document.getElementById("fileList").innerHTML = '❌ ফাইল লোড করা যায়নি!';
+      }
+    }
 
-    function getFileIcon(filename) {
-      const ext = filename.split('.').pop().toLowerCase();
-      if (["jpg", "jpeg", "png", "gif"].includes(ext)) return "🖼️";
-      if (["mp4", "mkv"].includes(ext)) return "🎞️";
-      if (["mp3", "wav"].includes(ext)) return "🎵";
-      if (["pdf", "doc", "docx"].includes(ext)) return "📄";
-      return "📁";
-    }
+    function getFileIcon(filename) {
+      const ext = filename.split('.').pop().toLowerCase();
+      if (["jpg", "jpeg", "png", "gif"].includes(ext)) return "🖼️";
+      if (["mp4", "mkv"].includes(ext)) return "🎞️";
+      if (["mp3", "wav"].includes(ext)) return "🎵";
+      if (["pdf", "doc", "docx"].includes(ext)) return "📄";
+      return "📁";
+    }
 
-    document.getElementById('uploadForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const status = document.getElementById('status');
-      const progressBar = document.getElementById('progressBar');
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const status = document.getElementById('status');
+      const progressBar = document.getElementById('progressBar');
 
-      progressBar.style.display = 'block';
-      progressBar.value = 0;
-      status.textContent = 'আপলোড হচ্ছে...';
+      progressBar.style.display = 'block';
+      progressBar.value = 0;
+      status.textContent = 'আপলোড হচ্ছে...';
 
-      const xhr = new XMLHttpRequest();
-      xhr.upload.onprogress = function(event) {
-        if (event.lengthComputable) {
-          progressBar.value = (event.loaded / event.total) * 100;
-        }
-      };
-      xhr.onload = async function() {
-        if (xhr.status === 200) {
-          const data = JSON.parse(xhr.responseText);
-          if (data.url) {
-            status.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
-            progressBar.style.display = 'none';
-            e.target.reset();
-            await loadFiles();
-          } else {
-            status.textContent = '❌ আপলোড ব্যর্থ হয়েছে!';
-            progressBar.style.display = 'none';
-          }
-        }
-      };
-      xhr.onerror = () => {
-        status.textContent = '❌ আপলোডে সমস্যা হয়েছে!';
-        progressBar.style.display = 'none';
-      };
-      xhr.open('POST', `${BACKUP_SERVER}/upload`);
-      xhr.send(formData);
-    });
+      const xhr = new XMLHttpRequest();
+      xhr.upload.onprogress = function(event) {
+        if (event.lengthComputable) {
+          progressBar.value = (event.loaded / event.total) * 100;
+        }
+      };
+      xhr.onload = async function() {
+        if (xhr.status === 200) {
+          const data = JSON.parse(xhr.responseText);
+          if (data.url) {
+            status.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
+            progressBar.style.display = 'none';
+            e.target.reset();
+            await loadFiles();
+          } else {
+            status.textContent = '❌ আপলোড ব্যর্থ হয়েছে!';
+            progressBar.style.display = 'none';
+          }
+        }
+      };
+      xhr.onerror = () => {
+        status.textContent = '❌ আপলোডে সমস্যা হয়েছে!';
+        progressBar.style.display = 'none';
+      };
+      xhr.open('POST', `${BACKUP_SERVER}/upload`);
+      xhr.send(formData);
+    });
 
-  </script>
+    // Auto-load if filterType exists
+    window.onload = () => {
+      const saved = localStorage.getItem('filterType');
+      if (saved) setFilter(saved);
+    };
+  </script>
 </body>
 </html>
