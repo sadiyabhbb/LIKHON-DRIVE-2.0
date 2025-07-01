@@ -240,11 +240,9 @@
     function setFilter(type) {
       localStorage.setItem('filterType', type);
       document.getElementById("fileList").innerHTML = "🔄 লোড হচ্ছে...";
-
       document.getElementById('homeIntro').style.display = 'none';
       document.getElementById('uploadSection').style.display = 'flex';
       document.querySelector('h2').style.display = 'block';
-
       loadFiles();
     }
 
