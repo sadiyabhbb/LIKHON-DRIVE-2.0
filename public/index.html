@@ -95,17 +95,20 @@
     .yellow { background: #ffbd2e; }
     .green { background: #27c93f; }
 
-    .sys-info {
-      font-family: monospace;
-      background: #111;
+    .terminal-window {
+      position: relative;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      padding: 20px;
+      border-radius: 12px;
       color: #00ff00;
+      font-family: monospace;
       font-size: 13px;
-      padding: 10px;
-      border-radius: 6px;
-      margin-top: 20px;
+      overflow: hidden;
       text-align: left;
-      white-space: pre-line;
-      box-shadow: 0 1px 4px rgba(0,255,0,0.2);
+      box-shadow: 0 0 15px rgba(0,255,0,0.1);
+      min-height: 140px;
+      margin-top: 20px;
     }
 
     #uploadSection {
@@ -224,13 +227,9 @@
       <p>💻 Technologies Used: Node.js, Express, JSON Storage</p>
       <p>📧 যোগাযোগ: admin@mydrive.com</p>
 
-      <div class="sys-info">
-📦 Python v3.11.3  
-🔧 Flask server active at 127.0.0.1:5000  
-📁 Storage mounted at /user/data/mydrive/  
-🚀 Uptime: 1 day 03:12:47  
-🧠 Memory Usage: 123.6 MB  
-🌐 API Endpoint: /upload, /files, /delete, /rename
+      <!-- 🧠 Terminal Info Block with Animation -->
+      <div class="terminal-window">
+        <pre id="terminalOutput"></pre>
       </div>
     </div>
 
@@ -386,6 +385,36 @@
       xhr.open('POST', `${BACKUP_SERVER}/upload`);
       xhr.send(formData);
     });
+
+    // 🔁 Terminal Typing Animation
+    const terminalLines = [
+      "📦 Python v3.11.3",
+      "🔧 Flask server active at 127.0.0.1:5000",
+      "📁 Storage mounted at /user/data/mydrive/",
+      "🚀 Uptime: 1 day 03:12:47",
+      "🧠 Memory Usage: 123.6 MB",
+      "🌐 API Endpoint: /upload, /files, /delete, /rename"
+    ];
+
+    const terminal = document.getElementById("terminalOutput");
+    let line = 0, char = 0;
+
+    function typeLine() {
+      if (line < terminalLines.length) {
+        if (char < terminalLines[line].length) {
+          terminal.textContent += terminalLines[line].charAt(char);
+          char++;
+          setTimeout(typeLine, 20);
+        } else {
+          terminal.textContent += "\n";
+          line++;
+          char = 0;
+          setTimeout(typeLine, 200);
+        }
+      }
+    }
+
+    window.addEventListener("load", typeLine);
   </script>
 </body>
 </html>
