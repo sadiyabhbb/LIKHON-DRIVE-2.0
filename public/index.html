@@ -28,6 +28,12 @@
     .menu {
       font-size: 24px;
       cursor: pointer;
+      padding: 0 10px;
+      transition: transform 0.2s;
+    }
+
+    .menu:hover {
+      transform: scale(1.1);
     }
 
     .dropdown {
@@ -51,6 +57,7 @@
       text-align: left;
       font-size: 16px;
       cursor: pointer;
+      transition: background 0.2s;
     }
 
     .dropdown button:hover {
@@ -67,13 +74,10 @@
       border-radius: 10px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       margin-bottom: 20px;
-    }
-
-    form#uploadForm {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 10px;
-      flex-wrap: wrap;
     }
 
     input[type="file"] {
@@ -122,6 +126,7 @@
       box-shadow: 0 1px 5px rgba(0,0,0,0.1);
       word-break: break-word;
       text-align: center;
+      position: relative;
     }
 
     .file-card .icon {
@@ -146,12 +151,19 @@
     .actions button {
       padding: 5px 10px;
       font-size: 12px;
-      background-color: #f1f1f1;
+      background: #eee;
+      border: none;
       border-radius: 5px;
+      cursor: pointer;
     }
 
     .actions button:hover {
-      background-color: #ddd;
+      background: #ddd;
+    }
+
+    h2 {
+      margin-top: 40px;
+      color: #4285f4;
     }
   </style>
 </head>
@@ -167,12 +179,11 @@
       <button onclick="setFilter('all')">✅ সকল ফাইল</button>
     </div>
   </header>
-
   <main>
     <div id="uploadSection">
       <form id="uploadForm">
         <input type="file" name="file" required />
-        <button type="submit">📤 আপলোড</button>
+        <button type="submit">আপলোড</button>
       </form>
     </div>
 
@@ -180,7 +191,7 @@
     <p id="status"></p>
 
     <h2>আপলোডকৃত ফাইলসমূহ</h2>
-    <div id="fileList"></div>
+    <div id="fileList">🔄 লোড হচ্ছে...</div>
   </main>
 
   <script>
@@ -188,7 +199,7 @@
 
     const getFileIcon = (filename) => {
       const ext = filename.split('.').pop().toLowerCase();
-      if (["jpg", "png", "jpeg", "gif"].includes(ext)) return "🖼️";
+      if (["jpg", "jpeg", "png", "gif"].includes(ext)) return "🖼️";
       if (["mp4", "mkv"].includes(ext)) return "🎞️";
       if (["mp3", "wav"].includes(ext)) return "🎵";
       if (["pdf", "doc", "docx"].includes(ext)) return "📄";
@@ -202,7 +213,8 @@
 
     function setFilter(type) {
       localStorage.setItem('filterType', type);
-      location.reload();
+      document.getElementById("fileList").innerHTML = "🔄 লোড হচ্ছে...";
+      loadFiles(); // ✅ no reload, just load
     }
 
     async function loadFiles() {
@@ -211,14 +223,15 @@
         const files = await res.json();
         const list = document.getElementById('fileList');
         const filter = localStorage.getItem('filterType') || 'all';
-        list.innerHTML = '';
 
         const fileFilter = {
-          images: ["jpg", "png", "jpeg", "gif"],
+          images: ["jpg", "jpeg", "png", "gif"],
           videos: ["mp4", "mkv"],
           audios: ["mp3", "wav"],
           docs: ["pdf", "doc", "docx"]
         };
+
+        list.innerHTML = '';
 
         files.reverse().forEach(file => {
           const name = file.name;
@@ -273,8 +286,8 @@
           card.appendChild(actions);
           list.appendChild(card);
         });
-      } catch (err) {
-        document.getElementById('fileList').innerHTML = '❌ ফাইল লোড করা যায়নি।';
+      } catch {
+        document.getElementById("fileList").innerHTML = '❌ ফাইল লোড করা যায়নি!';
       }
     }
 
@@ -282,7 +295,6 @@
       e.preventDefault();
       const form = e.target;
       const formData = new FormData(form);
-
       const status = document.getElementById('status');
       const progressBar = document.getElementById('progressBar');
 
@@ -291,14 +303,11 @@
       status.textContent = 'আপলোড হচ্ছে...';
 
       const xhr = new XMLHttpRequest();
-
       xhr.upload.onprogress = function(event) {
         if (event.lengthComputable) {
-          const percent = (event.loaded / event.total) * 100;
-          progressBar.value = percent;
+          progressBar.value = (event.loaded / event.total) * 100;
         }
       };
-
       xhr.onload = async function() {
         if (xhr.status === 200) {
           const data = JSON.parse(xhr.responseText);
@@ -311,17 +320,12 @@
             status.textContent = '❌ আপলোড ব্যর্থ হয়েছে!';
             progressBar.style.display = 'none';
           }
-        } else {
-          status.textContent = '❌ আপলোড ব্যর্থ হয়েছে!';
-          progressBar.style.display = 'none';
         }
       };
-
-      xhr.onerror = function() {
+      xhr.onerror = () => {
         status.textContent = '❌ আপলোডে সমস্যা হয়েছে!';
         progressBar.style.display = 'none';
       };
-
       xhr.open('POST', `${BACKUP_SERVER}/upload`);
       xhr.send(formData);
     });
