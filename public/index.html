@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -230,12 +230,12 @@
     📂 MyDrive
     <div class="menu" onclick="toggleDropdown()">☰</div>
     <div class="dropdown" id="dropdownMenu">
-      <button onclick="setFilter('images')">🖼️ ফটো</button>
-      <button onclick="setFilter('videos')">🎞️ ভিডিও</button>
-      <button onclick="setFilter('audios')">🎵 অডিও</button>
-      <button onclick="setFilter('docs')">📄 ডকুমেন্ট</button>
-      <button onclick="setFilter('all')">✅ সকল ফাইল</button>
-      <button onclick="clearFilter()">🏠 হোম</button>
+      <button onclick="setFilter('images')">Photos</button>
+      <button onclick="setFilter('videos')">videos</button>
+      <button onclick="setFilter('audios')">Audios</button>
+      <button onclick="setFilter('docs')">Documents</button>
+      <button onclick="setFilter('all')">All</button>
+<button onclick="clearFilter()">Home</button>
     </div>
   </header>
 
@@ -246,10 +246,10 @@
         <div class="light yellow"></div>
         <div class="light green"></div>
       </div>
-      <h1>📁 MyDrive এ স্বাগতম</h1>
-      <p>এটি একটি পার্সোনাল ড্রাইভ যেখানে আপনি আপনার ফাইল সংরক্ষণ করতে পারেন।</p>
-      <p>💻 Technologies Used: Node.js, Express, JSON Storage</p>
-      <p>📧 যোগাযোগ: admin@mydrive.com</p>
+      <h1>   Welcome To My Drive</h1>
+      <p>IT Is A Biggest Drive Storage. You Can Try Our Storage Very Smoothly. Its not a paid plan just Use Free Our Drive Storage.</p>
+      <p></p>
+      <p>Contact : @likhonahmed009 (fb) </p>
 
       <div class="terminal-window">
         <pre id="terminalOutput"></pre>
@@ -259,15 +259,14 @@
     <div id="uploadSection">
       <form id="uploadForm">
         <input type="file" name="file" required />
-        <button type="submit">আপলোড</button>
-      </form>
+        <button type="submit">Upload</button>
+        </form>
     </div>
-
     <progress id="progressBar" value="0" max="100"></progress>
     <p id="status"></p>
 
-    <h2 id="uploadedTitle" style="display:none;">আপলোডকৃত ফাইলসমূহ</h2>
-    <div id="fileList">🔄 লোড হচ্ছে...</div>
+    <h2 id="uploadedTitle" style="display:none;">All Uploads</h2>
+    <div id="fileList">Loading...</div>
   </main>
 
   <script>
@@ -331,18 +330,18 @@
           actions.className = 'actions';
 
           const delBtn = document.createElement('button');
-          delBtn.textContent = '🗑️ ডিলিট';
+          delBtn.textContent = 'Delete';
           delBtn.onclick = async () => {
-            if (confirm('তুমি কি ডিলিট করতে চাও?')) {
+            if (confirm('Are you sure delete?')) {
               await fetch(`${BACKUP_SERVER}/delete?path=${encodeURIComponent(path)}`, { method: 'DELETE' });
               loadFiles();
             }
           };
 
           const renameBtn = document.createElement('button');
-          renameBtn.textContent = '✏️ রিনেম';
+          renameBtn.textContent = 'Rename';
           renameBtn.onclick = async () => {
-            const newName = prompt('নতুন নাম দিন:', name);
+            const newName = prompt('Set new name:', name);
             if (newName && newName !== name) {
               await fetch(`${BACKUP_SERVER}/rename`, {
                 method: 'POST',
@@ -361,7 +360,7 @@
           list.appendChild(card);
         });
       } catch {
-        document.getElementById("fileList").innerHTML = '❌ ফাইল লোড করা যায়নি!';
+        document.getElementById("fileList").innerHTML = 'File not load !';
       }
     }
 
@@ -382,7 +381,7 @@
 
       progressBar.style.display = 'block';
       progressBar.value = 0;
-      status.textContent = 'আপলোড হচ্ছে...';
+      status.textContent = 'Uploading...';
 
       const xhr = new XMLHttpRequest();
       xhr.upload.onprogress = function(event) {
@@ -394,18 +393,18 @@
         if (xhr.status === 200) {
           const data = JSON.parse(xhr.responseText);
           if (data.url) {
-            status.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
+            status.textContent = 'Upload Successfully!';
             progressBar.style.display = 'none';
             e.target.reset();
             await loadFiles();
           } else {
-            status.textContent = '❌ আপলোড ব্যর্থ হয়েছে!';
+            status.textContent = 'Failed to uploaded!';
             progressBar.style.display = 'none';
           }
         }
       };
       xhr.onerror = () => {
-        status.textContent = '❌ আপলোডে সমস্যা হয়েছে!';
+        status.textContent = 'Uploading Problem!';
         progressBar.style.display = 'none';
       };
       xhr.open('POST', `${BACKUP_SERVER}/upload`);
@@ -414,9 +413,9 @@
 
     const terminalLines = [
       "{",
-      '  "name": "mydrive",',
+      '  "name": "CLOUDSTORAGE DRIVE 2.0",',
       '  "version": "1.0.0",',
-      '  "author": "Abdur Rahim",',
+      '  "author": "Likhon Ahmed",',
       '  "uptime": "1 day 04:23:59"',
       "}"
     ];
