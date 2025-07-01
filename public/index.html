@@ -7,91 +7,92 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #f5f5f5;
+      background: #121212;
+      color: #eee;
       margin: 0;
       padding: 0;
-      color: #333;
     }
+
     header {
-      background-color: #4285f4;
-      color: white;
+      background-color: #1e1e1e;
+      color: #fff;
       padding: 15px 30px;
       font-size: 24px;
       font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     }
+
     .menu {
       font-size: 24px;
       cursor: pointer;
       padding: 0 10px;
-      transition: transform 0.2s;
     }
-    .menu:hover {
-      transform: scale(1.1);
-    }
+
     .dropdown {
       position: absolute;
       top: 60px;
       right: 10px;
-      background: white;
-      border: 1px solid #ddd;
+      background: #1e1e1e;
+      border: 1px solid #333;
       border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       display: none;
       z-index: 10;
     }
+
     .dropdown button {
-      display: block;
+      color: #eee;
       padding: 10px 20px;
-      border: none;
       background: none;
+      border: none;
       width: 100%;
       text-align: left;
-      font-size: 16px;
       cursor: pointer;
-      transition: background 0.2s;
     }
+
     .dropdown button:hover {
-      background: #f1f1f1;
+      background: #333;
     }
+
     main {
       padding: 20px;
     }
 
     #homeIntro {
-      background: white;
+      background: #1e1e1e;
       padding: 30px;
       border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
       margin-bottom: 30px;
       text-align: center;
+      position: relative;
     }
 
-    .dot {
+    .lights {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      gap: 5px;
+    }
+
+    .light {
       width: 12px;
       height: 12px;
       border-radius: 50%;
-      display: inline-block;
-      box-shadow: 0 0 2px rgba(0,0,0,0.2);
-      transition: box-shadow 0.2s ease;
-    }
-    .dot.red { background: #ff5f56; }
-    .dot.yellow { background: #ffbd2e; }
-    .dot.green { background: #27c93f; }
-    .dot:hover {
-      box-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 0 0 4px currentColor;
-      cursor: pointer;
     }
 
+    .red { background: #ff5f56; }
+    .yellow { background: #ffbd2e; }
+    .green { background: #27c93f; }
+
     #uploadSection {
-      background: white;
+      background: #1e1e1e;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
       display: none;
       flex-wrap: wrap;
       align-items: center;
@@ -100,23 +101,24 @@
 
     input[type="file"] {
       flex: 1;
+      background: #333;
+      border: 1px solid #444;
+      color: #eee;
       padding: 8px;
-      border: 1px solid #ddd;
       border-radius: 5px;
     }
 
     button {
-      background-color: #4285f4;
+      background-color: #3a81f1;
       color: white;
       border: none;
       padding: 10px 15px;
       border-radius: 5px;
       cursor: pointer;
-      font-weight: bold;
     }
 
     button:hover {
-      background-color: #3367d6;
+      background-color: #2c6adf;
     }
 
     progress {
@@ -126,11 +128,6 @@
       margin-top: 10px;
     }
 
-    #status {
-      margin-top: 10px;
-      font-size: 14px;
-    }
-
     #fileList {
       display: none;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -138,13 +135,12 @@
     }
 
     .file-card {
-      background: white;
+      background: #1e1e1e;
       padding: 15px;
       border-radius: 10px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 5px rgba(0,0,0,0.4);
       word-break: break-word;
       text-align: center;
-      position: relative;
     }
 
     .file-card .icon {
@@ -154,9 +150,7 @@
 
     .file-card a {
       text-decoration: none;
-      color: #4285f4;
-      display: block;
-      font-weight: bold;
+      color: #3a81f1;
     }
 
     .actions {
@@ -169,19 +163,19 @@
     .actions button {
       padding: 5px 10px;
       font-size: 12px;
-      background: #eee;
+      background: #333;
+      color: white;
       border: none;
       border-radius: 5px;
-      cursor: pointer;
     }
 
     .actions button:hover {
-      background: #ddd;
+      background: #444;
     }
 
     h2 {
+      color: #3a81f1;
       margin-top: 40px;
-      color: #4285f4;
     }
   </style>
 </head>
@@ -200,35 +194,15 @@
 
   <main>
     <div id="homeIntro">
-      <h1>📁 MyDrive এ স্বাগতম</h1>
-      <p style="font-size: 16px; color: #444;">এটি একটি আধুনিক ক্লাউড-স্টোরেজ সিস্টেম, যা আপনি যেকোনো সময়, যেকোনো জায়গা থেকে ব্যবহার করতে পারবেন।</p>
-
-      <div style="background: #1e1e1e; color: #e8e8e8; font-family: monospace; border-radius: 8px; margin: 30px auto; max-width: 600px; overflow-x: auto; box-shadow: 0 0 5px rgba(0,0,0,0.3);">
-        <div style="background: #2e2e2e; padding: 8px 12px; border-top-left-radius: 8px; border-top-right-radius: 8px; display: flex; gap: 8px;">
-          <span class="dot red"></span>
-          <span class="dot yellow"></span>
-          <span class="dot green"></span>
-        </div>
-        <pre style="margin: 0; padding: 12px 16px;">
-<span style="color:#6A9955"># ফাইল আপলোড ফাংশন:</span>
-<span style="color:#569CD6">def</span> <span style="color:#DCDCAA">upload_file</span>(file):
-    <span style="color:#569CD6">if</span> file.size &lt; MAX_SIZE:
-        save_to_drive(file)
-    <span style="color:#569CD6">else</span>:
-        <span style="color:#D16969">return</span> <span style="color:#CE9178">"❌ ফাইলটি বড়!"</span>
-        </pre>
+      <div class="lights">
+        <div class="light red"></div>
+        <div class="light yellow"></div>
+        <div class="light green"></div>
       </div>
-
-      <ul style="text-align: left; display: inline-block; font-size: 15px; color: #333;">
-        <li>✅ সুন্দর ও রেসপনসিভ ডিজাইন</li>
-        <li>📤 আপলোড + প্রগ্রেস বার</li>
-        <li>📁 ক্যাটাগরি ফিল্টারিং</li>
-        <li>✏️ রিনেম ও 🗑️ ডিলিট সাপোর্ট</li>
-        <li>💾 আলাদা ব্যাকআপ সার্ভার</li>
-      </ul>
-
-      <hr style="margin: 30px 0;" />
-      <p style="font-size: 15px; color: #555;"><strong>যোগাযোগ:</strong> <a href="mailto:contact@mydrive.com" style="color:#4285f4;">contact@mydrive.com</a></p>
+      <h1>📁 MyDrive এ স্বাগতম</h1>
+      <p>এটি একটি পার্সোনাল ড্রাইভ যেখানে আপনি আপনার ফাইল সংরক্ষণ করতে পারেন।</p>
+      <p>💻 Technologies Used: Node.js, Express, JSON Storage</p>
+      <p>📧 যোগাযোগ: admin@mydrive.com</p>
     </div>
 
     <div id="uploadSection">
@@ -249,15 +223,6 @@
     const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
 
     localStorage.removeItem('filterType');
-
-    const getFileIcon = (filename) => {
-      const ext = filename.split('.').pop().toLowerCase();
-      if (["jpg", "jpeg", "png", "gif"].includes(ext)) return "🖼️";
-      if (["mp4", "mkv"].includes(ext)) return "🎞️";
-      if (["mp3", "wav"].includes(ext)) return "🎵";
-      if (["pdf", "doc", "docx"].includes(ext)) return "📄";
-      return "📁";
-    };
 
     function toggleDropdown() {
       const menu = document.getElementById('dropdownMenu');
@@ -294,7 +259,6 @@
           const name = file.name;
           const path = file.path;
           const ext = name.split('.').pop().toLowerCase();
-
           if (name === '.gitkeep') return;
           if (filter !== 'all' && !fileFilter[filter].includes(ext)) return;
 
@@ -348,10 +312,18 @@
       }
     }
 
+    function getFileIcon(filename) {
+      const ext = filename.split('.').pop().toLowerCase();
+      if (["jpg", "jpeg", "png", "gif"].includes(ext)) return "🖼️";
+      if (["mp4", "mkv"].includes(ext)) return "🎞️";
+      if (["mp3", "wav"].includes(ext)) return "🎵";
+      if (["pdf", "doc", "docx"].includes(ext)) return "📄";
+      return "📁";
+    }
+
     document.getElementById('uploadForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
+      const formData = new FormData(e.target);
       const status = document.getElementById('status');
       const progressBar = document.getElementById('progressBar');
 
@@ -371,7 +343,7 @@
           if (data.url) {
             status.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
             progressBar.style.display = 'none';
-            form.reset();
+            e.target.reset();
             await loadFiles();
           } else {
             status.textContent = '❌ আপলোড ব্যর্থ হয়েছে!';
@@ -387,9 +359,6 @@
       xhr.send(formData);
     });
 
-    document.getElementById('uploadSection').style.display = 'none';
-    document.getElementById('fileList').style.display = 'none';
-    document.getElementById('uploadedTitle').style.display = 'none';
   </script>
 </body>
 </html>
