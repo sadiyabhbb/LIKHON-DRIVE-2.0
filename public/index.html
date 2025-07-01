@@ -59,10 +59,8 @@
       cursor: pointer;
     }
 
-    .dropdown button:hover,
-    .dropdown button.active {
-      background: #3a81f1;
-      color: #fff;
+    .dropdown button:hover {
+      background: #333;
     }
 
     main {
@@ -110,7 +108,6 @@
       text-align: left;
       box-shadow: 0 0 20px rgba(0,255,0,0.15);
       min-height: 200px;
-      max-width: 100%;
       margin-top: 30px;
       line-height: 1.6;
       border: 1px solid rgba(0,255,0,0.2);
@@ -238,6 +235,7 @@
       <button onclick="setFilter('audios')">🎵 অডিও</button>
       <button onclick="setFilter('docs')">📄 ডকুমেন্ট</button>
       <button onclick="setFilter('all')">✅ সকল ফাইল</button>
+      <button onclick="clearFilter()">🏠 হোম</button>
     </div>
   </header>
 
@@ -282,20 +280,18 @@
 
     function setFilter(type) {
       localStorage.setItem('filterType', type);
-      document.querySelectorAll('.dropdown button').forEach(btn => btn.classList.remove('active'));
-      const btns = document.querySelectorAll('.dropdown button');
-      btns.forEach(btn => {
-        if (btn.textContent.includes(type === 'all' ? 'সকল' : type[0].toUpperCase())) {
-          btn.classList.add('active');
-        }
-      });
 
+      document.getElementById("homeIntro").style.display = "none";
       document.getElementById("fileList").style.display = "grid";
       document.getElementById("uploadedTitle").style.display = "block";
       document.getElementById("uploadSection").style.display = "flex";
-      document.getElementById("homeIntro").style.display = "none";
       document.getElementById("fileList").innerHTML = "🔄 লোড হচ্ছে...";
       loadFiles();
+    }
+
+    function clearFilter() {
+      localStorage.removeItem("filterType");
+      location.reload();
     }
 
     async function loadFiles() {
@@ -446,9 +442,7 @@
     }
 
     window.addEventListener("load", () => {
-      const filter = localStorage.getItem("filterType");
-      if (filter) setFilter(filter);
-      else document.getElementById("homeIntro").style.display = "block";
+      document.getElementById("homeIntro").style.display = "block";
       typeLine();
     });
   </script>
