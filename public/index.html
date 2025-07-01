@@ -59,8 +59,10 @@
       cursor: pointer;
     }
 
-    .dropdown button:hover {
-      background: #333;
+    .dropdown button:hover,
+    .dropdown button.active {
+      background: #3a81f1;
+      color: #fff;
     }
 
     main {
@@ -97,18 +99,42 @@
 
     .terminal-window {
       position: relative;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(6px);
-      padding: 20px;
-      border-radius: 12px;
+      padding: 30px;
+      border-radius: 16px;
       color: #00ff00;
       font-family: monospace;
-      font-size: 13px;
+      font-size: 15px;
       overflow: hidden;
       text-align: left;
-      box-shadow: 0 0 15px rgba(0,255,0,0.1);
-      min-height: 140px;
-      margin-top: 20px;
+      box-shadow: 0 0 20px rgba(0,255,0,0.15);
+      min-height: 200px;
+      max-width: 100%;
+      margin-top: 30px;
+      line-height: 1.6;
+      border: 1px solid rgba(0,255,0,0.2);
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from {
+        box-shadow: 0 0 5px rgba(0,255,0,0.2), 0 0 10px rgba(0,255,0,0.1);
+      }
+      to {
+        box-shadow: 0 0 15px rgba(0,255,0,0.3), 0 0 25px rgba(0,255,0,0.2);
+      }
+    }
+
+    #terminalOutput::after {
+      content: "_";
+      animation: blink 1s infinite;
+      font-weight: bold;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
     }
 
     #uploadSection {
@@ -227,7 +253,6 @@
       <p>💻 Technologies Used: Node.js, Express, JSON Storage</p>
       <p>📧 যোগাযোগ: admin@mydrive.com</p>
 
-      <!-- 🧠 Terminal Info Block with Animation -->
       <div class="terminal-window">
         <pre id="terminalOutput"></pre>
       </div>
@@ -249,7 +274,6 @@
 
   <script>
     const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
-    localStorage.removeItem('filterType');
 
     function toggleDropdown() {
       const menu = document.getElementById('dropdownMenu');
@@ -258,6 +282,14 @@
 
     function setFilter(type) {
       localStorage.setItem('filterType', type);
+      document.querySelectorAll('.dropdown button').forEach(btn => btn.classList.remove('active'));
+      const btns = document.querySelectorAll('.dropdown button');
+      btns.forEach(btn => {
+        if (btn.textContent.includes(type === 'all' ? 'সকল' : type[0].toUpperCase())) {
+          btn.classList.add('active');
+        }
+      });
+
       document.getElementById("fileList").style.display = "grid";
       document.getElementById("uploadedTitle").style.display = "block";
       document.getElementById("uploadSection").style.display = "flex";
@@ -386,7 +418,6 @@
       xhr.send(formData);
     });
 
-    // 🔁 Terminal Typing Animation
     const terminalLines = [
       "📦 Python v3.11.3",
       "🔧 Flask server active at 127.0.0.1:5000",
@@ -414,7 +445,12 @@
       }
     }
 
-    window.addEventListener("load", typeLine);
+    window.addEventListener("load", () => {
+      const filter = localStorage.getItem("filterType");
+      if (filter) setFilter(filter);
+      else document.getElementById("homeIntro").style.display = "block";
+      typeLine();
+    });
   </script>
 </body>
 </html>
