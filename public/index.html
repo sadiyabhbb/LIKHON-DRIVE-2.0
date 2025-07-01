@@ -68,13 +68,22 @@
       padding: 20px;
     }
 
+    #homeIntro {
+      text-align: center;
+      padding: 40px 10px;
+    }
+
+    #homeIntro h1 {
+      color: #4285f4;
+    }
+
     #uploadSection {
       background: white;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       margin-bottom: 20px;
-      display: flex;
+      display: none;
       flex-wrap: wrap;
       align-items: center;
       gap: 10px;
@@ -164,6 +173,7 @@
     h2 {
       margin-top: 40px;
       color: #4285f4;
+      display: none;
     }
   </style>
 </head>
@@ -179,7 +189,14 @@
       <button onclick="setFilter('all')">✅ সকল ফাইল</button>
     </div>
   </header>
+
   <main>
+    <div id="homeIntro">
+      <h1>📁 আমার ড্রাইভে স্বাগতম</h1>
+      <p>এখানে আপনি আপনার প্রয়োজনীয় ফাইল আপলোড করে রাখতে পারবেন।</p>
+      <p>যোগাযোগ: <a href="mailto:your@email.com">your@email.com</a></p>
+    </div>
+
     <div id="uploadSection">
       <form id="uploadForm">
         <input type="file" name="file" required />
@@ -191,7 +208,7 @@
     <p id="status"></p>
 
     <h2>আপলোডকৃত ফাইলসমূহ</h2>
-    <div id="fileList">🔄 লোড হচ্ছে...</div>
+    <div id="fileList"></div>
   </main>
 
   <script>
@@ -214,7 +231,15 @@
     function setFilter(type) {
       localStorage.setItem('filterType', type);
       document.getElementById("fileList").innerHTML = "🔄 লোড হচ্ছে...";
-      loadFiles(); // ✅ no reload, just load
+
+      const showDriveUI = type !== '';
+
+      document.querySelector('header').style.display = showDriveUI ? 'flex' : 'none';
+      document.getElementById('uploadSection').style.display = showDriveUI ? 'flex' : 'none';
+      document.querySelector('h2').style.display = showDriveUI ? 'block' : 'none';
+      document.getElementById('homeIntro').style.display = showDriveUI ? 'none' : 'block';
+
+      loadFiles();
     }
 
     async function loadFiles() {
@@ -239,7 +264,7 @@
           const ext = name.split('.').pop().toLowerCase();
 
           if (name === '.gitkeep') return;
-          if (filter !== 'all' && !fileFilter[filter].includes(ext)) return;
+          if (filter !== 'all' && filter !== '' && !fileFilter[filter].includes(ext)) return;
 
           const card = document.createElement('div');
           card.className = 'file-card';
@@ -330,7 +355,10 @@
       xhr.send(formData);
     });
 
-    loadFiles();
+    window.onload = () => {
+      const filter = localStorage.getItem('filterType') || '';
+      setFilter(filter); // Homepage view initially
+    };
   </script>
 </body>
 </html>
