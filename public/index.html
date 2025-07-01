@@ -70,6 +70,22 @@
       text-align: center;
     }
 
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 2px rgba(0,0,0,0.2);
+      transition: box-shadow 0.2s ease;
+    }
+    .dot.red { background: #ff5f56; }
+    .dot.yellow { background: #ffbd2e; }
+    .dot.green { background: #27c93f; }
+    .dot:hover {
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 0 0 4px currentColor;
+      cursor: pointer;
+    }
+
     #uploadSection {
       background: white;
       padding: 20px;
@@ -185,8 +201,34 @@
   <main>
     <div id="homeIntro">
       <h1>📁 MyDrive এ স্বাগতম</h1>
-      <p>এখানে আপনি আপনার প্রয়োজনীয় ফাইল আপলোড করে রাখতে পারবেন।</p>
-      <p>যোগাযোগ: contact@mydrive.com</p>
+      <p style="font-size: 16px; color: #444;">এটি একটি আধুনিক ক্লাউড-স্টোরেজ সিস্টেম, যা আপনি যেকোনো সময়, যেকোনো জায়গা থেকে ব্যবহার করতে পারবেন।</p>
+
+      <div style="background: #1e1e1e; color: #e8e8e8; font-family: monospace; border-radius: 8px; margin: 30px auto; max-width: 600px; overflow-x: auto; box-shadow: 0 0 5px rgba(0,0,0,0.3);">
+        <div style="background: #2e2e2e; padding: 8px 12px; border-top-left-radius: 8px; border-top-right-radius: 8px; display: flex; gap: 8px;">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+        <pre style="margin: 0; padding: 12px 16px;">
+<span style="color:#6A9955"># ফাইল আপলোড ফাংশন:</span>
+<span style="color:#569CD6">def</span> <span style="color:#DCDCAA">upload_file</span>(file):
+    <span style="color:#569CD6">if</span> file.size &lt; MAX_SIZE:
+        save_to_drive(file)
+    <span style="color:#569CD6">else</span>:
+        <span style="color:#D16969">return</span> <span style="color:#CE9178">"❌ ফাইলটি বড়!"</span>
+        </pre>
+      </div>
+
+      <ul style="text-align: left; display: inline-block; font-size: 15px; color: #333;">
+        <li>✅ সুন্দর ও রেসপনসিভ ডিজাইন</li>
+        <li>📤 আপলোড + প্রগ্রেস বার</li>
+        <li>📁 ক্যাটাগরি ফিল্টারিং</li>
+        <li>✏️ রিনেম ও 🗑️ ডিলিট সাপোর্ট</li>
+        <li>💾 আলাদা ব্যাকআপ সার্ভার</li>
+      </ul>
+
+      <hr style="margin: 30px 0;" />
+      <p style="font-size: 15px; color: #555;"><strong>যোগাযোগ:</strong> <a href="mailto:contact@mydrive.com" style="color:#4285f4;">contact@mydrive.com</a></p>
     </div>
 
     <div id="uploadSection">
@@ -206,7 +248,6 @@
   <script>
     const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
 
-    // Always show homepage first
     localStorage.removeItem('filterType');
 
     const getFileIcon = (filename) => {
@@ -346,7 +387,6 @@
       xhr.send(formData);
     });
 
-    // প্রথমে কিছু না দেখিয়ে description দেখাও
     document.getElementById('uploadSection').style.display = 'none';
     document.getElementById('fileList').style.display = 'none';
     document.getElementById('uploadedTitle').style.display = 'none';
