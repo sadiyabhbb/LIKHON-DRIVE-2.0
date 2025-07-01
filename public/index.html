@@ -23,7 +23,6 @@
       align-items: center;
       justify-content: space-between;
       box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-      position: relative;
     }
 
     .menu {
@@ -39,17 +38,8 @@
       background: #1e1e1e;
       border: 1px solid #333;
       border-radius: 8px;
-      opacity: 0;
-      transform: translateY(-10px);
-      pointer-events: none;
-      transition: all 0.2s ease-in-out;
+      display: none;
       z-index: 10;
-    }
-
-    .dropdown.show {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
     }
 
     .dropdown button {
@@ -232,18 +222,12 @@
   <script>
     const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
 
+    localStorage.removeItem('filterType');
+
     function toggleDropdown() {
       const menu = document.getElementById('dropdownMenu');
-      menu.classList.toggle('show');
+      menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
     }
-
-    window.addEventListener('click', function(e) {
-      const menuBtn = document.querySelector('.menu');
-      const dropdown = document.getElementById('dropdownMenu');
-      if (!menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
-        dropdown.classList.remove('show');
-      }
-    });
 
     function setFilter(type) {
       localStorage.setItem('filterType', type);
@@ -375,11 +359,6 @@
       xhr.send(formData);
     });
 
-    // Auto-load if filterType exists
-    window.onload = () => {
-      const saved = localStorage.getItem('filterType');
-      if (saved) setFilter(saved);
-    };
   </script>
 </body>
 </html>
