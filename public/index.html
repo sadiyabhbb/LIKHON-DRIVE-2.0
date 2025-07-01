@@ -12,7 +12,6 @@
       padding: 0;
       color: #333;
     }
-
     header {
       background-color: #4285f4;
       color: white;
@@ -24,18 +23,15 @@
       justify-content: space-between;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
-
     .menu {
       font-size: 24px;
       cursor: pointer;
       padding: 0 10px;
       transition: transform 0.2s;
     }
-
     .menu:hover {
       transform: scale(1.1);
     }
-
     .dropdown {
       position: absolute;
       top: 60px;
@@ -47,7 +43,6 @@
       display: none;
       z-index: 10;
     }
-
     .dropdown button {
       display: block;
       padding: 10px 20px;
@@ -59,22 +54,20 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-
     .dropdown button:hover {
       background: #f1f1f1;
     }
-
     main {
       padding: 20px;
     }
 
     #homeIntro {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
       text-align: center;
-      padding: 40px 10px;
-    }
-
-    #homeIntro h1 {
-      color: #4285f4;
     }
 
     #uploadSection {
@@ -123,7 +116,7 @@
     }
 
     #fileList {
-      display: grid;
+      display: none;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 15px;
     }
@@ -173,7 +166,6 @@
     h2 {
       margin-top: 40px;
       color: #4285f4;
-      display: none;
     }
   </style>
 </head>
@@ -194,7 +186,7 @@
     <div id="homeIntro">
       <h1>📁 MyDrive এ স্বাগতম</h1>
       <p>এখানে আপনি আপনার প্রয়োজনীয় ফাইল আপলোড করে রাখতে পারবেন।</p>
-      <p>যোগাযোগ: <a href="mailto:you@example.com">you@example.com</a></p>
+      <p>যোগাযোগ: contact@mydrive.com</p>
     </div>
 
     <div id="uploadSection">
@@ -207,12 +199,15 @@
     <progress id="progressBar" value="0" max="100"></progress>
     <p id="status"></p>
 
-    <h2>আপলোডকৃত ফাইলসমূহ</h2>
-    <div id="fileList"></div>
+    <h2 id="uploadedTitle" style="display:none;">আপলোডকৃত ফাইলসমূহ</h2>
+    <div id="fileList">🔄 লোড হচ্ছে...</div>
   </main>
 
   <script>
     const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
+
+    // Always show homepage first
+    localStorage.removeItem('filterType');
 
     const getFileIcon = (filename) => {
       const ext = filename.split('.').pop().toLowerCase();
@@ -228,21 +223,13 @@
       menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
     }
 
-    function showHomepage() {
-      document.getElementById('homeIntro').style.display = 'block';
-      document.getElementById('uploadSection').style.display = 'none';
-      document.querySelector('h2').style.display = 'none';
-      document.getElementById('fileList').innerHTML = '';
-      document.getElementById('status').textContent = '';
-      document.getElementById('progressBar').style.display = 'none';
-    }
-
     function setFilter(type) {
       localStorage.setItem('filterType', type);
+      document.getElementById("fileList").style.display = "grid";
+      document.getElementById("uploadedTitle").style.display = "block";
+      document.getElementById("uploadSection").style.display = "flex";
+      document.getElementById("homeIntro").style.display = "none";
       document.getElementById("fileList").innerHTML = "🔄 লোড হচ্ছে...";
-      document.getElementById('homeIntro').style.display = 'none';
-      document.getElementById('uploadSection').style.display = 'flex';
-      document.querySelector('h2').style.display = 'block';
       loadFiles();
     }
 
@@ -359,14 +346,10 @@
       xhr.send(formData);
     });
 
-    window.onload = () => {
-      const filter = localStorage.getItem('filterType');
-      if (filter) {
-        setFilter(filter);
-      } else {
-        showHomepage();
-      }
-    };
+    // প্রথমে কিছু না দেখিয়ে description দেখাও
+    document.getElementById('uploadSection').style.display = 'none';
+    document.getElementById('fileList').style.display = 'none';
+    document.getElementById('uploadedTitle').style.display = 'none';
   </script>
 </body>
 </html>
