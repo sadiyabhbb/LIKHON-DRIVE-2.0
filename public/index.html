@@ -28,7 +28,6 @@
     .menu {
       font-size: 24px;
       cursor: pointer;
-      padding: 0 10px;
     }
 
     .dropdown {
@@ -68,10 +67,13 @@
       border-radius: 10px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       margin-bottom: 20px;
+    }
+
+    form#uploadForm {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     input[type="file"] {
@@ -89,6 +91,10 @@
       border-radius: 5px;
       cursor: pointer;
       font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #3367d6;
     }
 
     progress {
@@ -114,6 +120,7 @@
       padding: 15px;
       border-radius: 10px;
       box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+      word-break: break-word;
       text-align: center;
     }
 
@@ -123,8 +130,8 @@
     }
 
     .file-card a {
-      color: #4285f4;
       text-decoration: none;
+      color: #4285f4;
       display: block;
       font-weight: bold;
     }
@@ -140,18 +147,11 @@
       padding: 5px 10px;
       font-size: 12px;
       background-color: #f1f1f1;
-      border: none;
       border-radius: 5px;
     }
 
     .actions button:hover {
       background-color: #ddd;
-    }
-
-    h2 {
-      margin-top: 40px;
-      font-size: 26px;
-      color: #4285f4;
     }
   </style>
 </head>
@@ -172,7 +172,7 @@
     <div id="uploadSection">
       <form id="uploadForm">
         <input type="file" name="file" required />
-        <button type="submit">আপলোড</button>
+        <button type="submit">📤 আপলোড</button>
       </form>
     </div>
 
@@ -186,39 +186,39 @@
   <script>
     const BACKUP_SERVER = 'https://drive-main-storage.onrender.com';
 
-    const fileTypes = {
-      images: ['jpg', 'jpeg', 'png', 'gif'],
-      videos: ['mp4', 'mkv'],
-      audios: ['mp3', 'wav'],
-      docs: ['pdf', 'doc', 'docx']
-    };
-
     const getFileIcon = (filename) => {
       const ext = filename.split('.').pop().toLowerCase();
-      if (fileTypes.images.includes(ext)) return '🖼️';
-      if (fileTypes.videos.includes(ext)) return '🎞️';
-      if (fileTypes.audios.includes(ext)) return '🎵';
-      if (fileTypes.docs.includes(ext)) return '📄';
-      return '📁';
+      if (["jpg", "png", "jpeg", "gif"].includes(ext)) return "🖼️";
+      if (["mp4", "mkv"].includes(ext)) return "🎞️";
+      if (["mp3", "wav"].includes(ext)) return "🎵";
+      if (["pdf", "doc", "docx"].includes(ext)) return "📄";
+      return "📁";
     };
 
     function toggleDropdown() {
-      const dropdown = document.getElementById('dropdownMenu');
-      dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+      const menu = document.getElementById('dropdownMenu');
+      menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
     }
 
     function setFilter(type) {
       localStorage.setItem('filterType', type);
-      loadFiles(); // No reload, just reload files
+      location.reload();
     }
 
     async function loadFiles() {
       try {
         const res = await fetch(`${BACKUP_SERVER}/files`);
         const files = await res.json();
-        const filter = localStorage.getItem('filterType') || 'all';
         const list = document.getElementById('fileList');
+        const filter = localStorage.getItem('filterType') || 'all';
         list.innerHTML = '';
+
+        const fileFilter = {
+          images: ["jpg", "png", "jpeg", "gif"],
+          videos: ["mp4", "mkv"],
+          audios: ["mp3", "wav"],
+          docs: ["pdf", "doc", "docx"]
+        };
 
         files.reverse().forEach(file => {
           const name = file.name;
@@ -226,7 +226,7 @@
           const ext = name.split('.').pop().toLowerCase();
 
           if (name === '.gitkeep') return;
-          if (filter !== 'all' && !fileTypes[filter].includes(ext)) return;
+          if (filter !== 'all' && !fileFilter[filter].includes(ext)) return;
 
           const card = document.createElement('div');
           card.className = 'file-card';
@@ -243,6 +243,15 @@
           const actions = document.createElement('div');
           actions.className = 'actions';
 
+          const delBtn = document.createElement('button');
+          delBtn.textContent = '🗑️ ডিলিট';
+          delBtn.onclick = async () => {
+            if (confirm('তুমি কি ডিলিট করতে চাও?')) {
+              await fetch(`${BACKUP_SERVER}/delete?path=${encodeURIComponent(path)}`, { method: 'DELETE' });
+              loadFiles();
+            }
+          };
+
           const renameBtn = document.createElement('button');
           renameBtn.textContent = '✏️ রিনেম';
           renameBtn.onclick = async () => {
@@ -257,55 +266,54 @@
             }
           };
 
-          const deleteBtn = document.createElement('button');
-          deleteBtn.textContent = '🗑️ ডিলিট';
-          deleteBtn.onclick = async () => {
-            const confirmDelete = confirm('তুমি কি ডিলিট করতে চাও?');
-            if (confirmDelete) {
-              await fetch(`${BACKUP_SERVER}/delete?path=${encodeURIComponent(path)}`, {
-                method: 'DELETE'
-              });
-              loadFiles();
-            }
-          };
-
           actions.appendChild(renameBtn);
-          actions.appendChild(deleteBtn);
+          actions.appendChild(delBtn);
           card.appendChild(icon);
           card.appendChild(link);
           card.appendChild(actions);
           list.appendChild(card);
         });
-      } catch {
+      } catch (err) {
         document.getElementById('fileList').innerHTML = '❌ ফাইল লোড করা যায়নি।';
       }
     }
 
     document.getElementById('uploadForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const formData = new FormData(e.target);
+      const form = e.target;
+      const formData = new FormData(form);
 
       const status = document.getElementById('status');
       const progressBar = document.getElementById('progressBar');
+
       progressBar.style.display = 'block';
       progressBar.value = 0;
       status.textContent = 'আপলোড হচ্ছে...';
 
       const xhr = new XMLHttpRequest();
-      xhr.upload.onprogress = function(e) {
-        if (e.lengthComputable) {
-          progressBar.value = (e.loaded / e.total) * 100;
+
+      xhr.upload.onprogress = function(event) {
+        if (event.lengthComputable) {
+          const percent = (event.loaded / event.total) * 100;
+          progressBar.value = percent;
         }
       };
 
       xhr.onload = async function() {
-        progressBar.style.display = 'none';
         if (xhr.status === 200) {
-          status.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
-          e.target.reset();
-          loadFiles();
+          const data = JSON.parse(xhr.responseText);
+          if (data.url) {
+            status.textContent = '✅ সফলভাবে আপলোড হয়েছে!';
+            progressBar.style.display = 'none';
+            form.reset();
+            await loadFiles();
+          } else {
+            status.textContent = '❌ আপলোড ব্যর্থ হয়েছে!';
+            progressBar.style.display = 'none';
+          }
         } else {
           status.textContent = '❌ আপলোড ব্যর্থ হয়েছে!';
+          progressBar.style.display = 'none';
         }
       };
 
@@ -318,7 +326,6 @@
       xhr.send(formData);
     });
 
-    // Initial load
     loadFiles();
   </script>
 </body>
