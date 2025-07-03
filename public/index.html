@@ -1,3 +1,4 @@
+<!-- 🔽 HTML শুরু -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -63,78 +64,133 @@
       background: #333;
     }
 
-    main {
+    #homeIntro {
+      background: #1e1e1e;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      margin: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .lights {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      gap: 5px;
+    }
+
+    .light {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .red { background: #ff5f56; }
+    .yellow { background: #ffbd2e; }
+    .green { background: #27c93f; }
+
+    .terminal-window {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      padding: 30px;
+      border-radius: 16px;
+      color: #00ff00;
+      font-family: monospace;
+      font-size: 15px;
+      overflow: hidden;
+      text-align: left;
+      box-shadow: 0 0 20px rgba(0,255,0,0.15);
+      min-height: 200px;
+      margin-top: 30px;
+      line-height: 1.6;
+      border: 1px solid rgba(0,255,0,0.2);
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from {
+        box-shadow: 0 0 5px rgba(0,255,0,0.2), 0 0 10px rgba(0,255,0,0.1);
+      }
+      to {
+        box-shadow: 0 0 15px rgba(0,255,0,0.3), 0 0 25px rgba(0,255,0,0.2);
+      }
+    }
+
+    #terminalOutput::after {
+      content: "_";
+      animation: blink 1s infinite;
+      font-weight: bold;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+
+    #uploadSection {
+      background: #1e1e1e;
       padding: 20px;
+      margin: 20px;
+      border-radius: 10px;
+      display: none;
     }
 
     #fileList {
+      margin: 20px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
+      display: none;
     }
 
-    .file-item {
+    .file-row {
       background: #1e1e1e;
-      padding: 12px 16px;
-      border-radius: 8px;
       border: 1px solid #333;
+      padding: 10px 15px;
+      border-radius: 8px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      align-items: center;
+      position: relative;
     }
 
     .file-name {
       color: #3a81f1;
       text-decoration: none;
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
-    .file-actions {
-      position: relative;
-    }
-
-    .action-button {
-      background: none;
-      border: none;
-      color: #eee;
-      font-size: 18px;
+    .dot-menu {
       cursor: pointer;
+      font-size: 20px;
+      padding: 5px;
     }
 
-    .action-menu {
+    .dot-dropdown {
       position: absolute;
-      top: 30px;
-      right: 0;
-      background: #2c2c2c;
-      border: 1px solid #444;
+      right: 10px;
+      top: 40px;
+      background: #222;
+      border: 1px solid #333;
       border-radius: 6px;
       display: none;
       flex-direction: column;
-      min-width: 100px;
-      z-index: 10;
+      z-index: 100;
     }
 
-    .action-menu button {
+    .dot-dropdown button {
+      padding: 8px 12px;
       background: none;
       border: none;
-      padding: 10px;
-      color: white;
+      color: #fff;
       text-align: left;
       cursor: pointer;
-      width: 100%;
     }
 
-    .action-menu button:hover {
+    .dot-dropdown button:hover {
       background: #444;
-    }
-
-    h2 {
-      color: #3a81f1;
-      margin-bottom: 20px;
     }
   </style>
 </head>
@@ -152,10 +208,31 @@
     </div>
   </header>
 
-  <main>
-    <h2>All Files</h2>
-    <div id="fileList">Loading...</div>
-  </main>
+  <div id="homeIntro">
+    <div class="lights">
+      <div class="light red"></div>
+      <div class="light yellow"></div>
+      <div class="light green"></div>
+    </div>
+    <h1>Welcome To My Drive</h1>
+    <p>IT Is A Biggest Drive Storage. You Can Try Our Storage Very Smoothly. It's not a paid plan — just use Free Our Drive Storage.</p>
+    <p>Contact : @likhonahmed009 (fb)</p>
+    <div class="terminal-window">
+      <pre id="terminalOutput"></pre>
+    </div>
+  </div>
+
+  <div id="uploadSection">
+    <form id="uploadForm">
+      <input type="file" name="file" required />
+      <button type="submit">Upload</button>
+    </form>
+    <progress id="progressBar" value="0" max="100" style="width:100%;margin-top:10px;"></progress>
+    <p id="status"></p>
+  </div>
+
+  <h2 id="uploadedTitle" style="display:none;margin-left:20px;">All Uploads</h2>
+  <div id="fileList">Loading...</div>
 
   <script>
     const BACKUP_SERVER = 'https://l-d-storage-backup.onrender.com';
@@ -166,6 +243,10 @@
 
     function setFilter(type) {
       localStorage.setItem('filterType', type);
+      document.getElementById("homeIntro").style.display = "none";
+      document.getElementById("fileList").style.display = "flex";
+      document.getElementById("uploadedTitle").style.display = "block";
+      document.getElementById("uploadSection").style.display = "block";
       loadFiles();
     }
 
@@ -197,8 +278,8 @@
           if (name === '.gitkeep') return;
           if (filter !== 'all' && !fileFilter[filter].includes(ext)) return;
 
-          const item = document.createElement('div');
-          item.className = 'file-item';
+          const row = document.createElement('div');
+          row.className = 'file-row';
 
           const link = document.createElement('a');
           link.href = file.url;
@@ -206,24 +287,17 @@
           link.textContent = name;
           link.className = 'file-name';
 
-          const actions = document.createElement('div');
-          actions.className = 'file-actions';
+          const dot = document.createElement('div');
+          dot.className = 'dot-menu';
+          dot.textContent = '⋮';
 
-          const moreBtn = document.createElement('button');
-          moreBtn.className = 'action-button';
-          moreBtn.textContent = '⋮';
-
-          const menu = document.createElement('div');
-          menu.className = 'action-menu';
-
-          const downloadBtn = document.createElement('button');
-          downloadBtn.textContent = '📥 Download';
-          downloadBtn.onclick = () => window.open(file.url, '_blank');
+          const dropdown = document.createElement('div');
+          dropdown.className = 'dot-dropdown';
 
           const renameBtn = document.createElement('button');
-          renameBtn.textContent = '✏️ Rename';
+          renameBtn.textContent = 'Rename';
           renameBtn.onclick = async () => {
-            const newName = prompt('New file name:', name);
+            const newName = prompt('New name:', name);
             if (newName && newName !== name) {
               await fetch(`${BACKUP_SERVER}/rename`, {
                 method: 'POST',
@@ -235,44 +309,108 @@
           };
 
           const deleteBtn = document.createElement('button');
-          deleteBtn.textContent = '🗑️ Delete';
+          deleteBtn.textContent = 'Delete';
           deleteBtn.onclick = async () => {
-            if (confirm('Are you sure you want to delete this file?')) {
-              await fetch(`${BACKUP_SERVER}/delete?path=${encodeURIComponent(path)}`, {
-                method: 'DELETE'
-              });
+            if (confirm('Delete this file?')) {
+              await fetch(`${BACKUP_SERVER}/delete?path=${encodeURIComponent(path)}`, { method: 'DELETE' });
               loadFiles();
             }
           };
 
-          menu.appendChild(downloadBtn);
-          menu.appendChild(renameBtn);
-          menu.appendChild(deleteBtn);
-
-          moreBtn.onclick = () => {
-            const openMenus = document.querySelectorAll('.action-menu');
-            openMenus.forEach(m => m.style.display = 'none');
-            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+          const downloadBtn = document.createElement('button');
+          downloadBtn.textContent = 'Download';
+          downloadBtn.onclick = () => {
+            window.open(file.url, '_blank');
           };
 
-          actions.appendChild(moreBtn);
-          actions.appendChild(menu);
-          item.appendChild(link);
-          item.appendChild(actions);
-          list.appendChild(item);
+          dropdown.append(renameBtn, deleteBtn, downloadBtn);
+
+          dot.onclick = (e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.dot-dropdown').forEach(dd => dd.style.display = 'none');
+            dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+          };
+
+          document.addEventListener('click', () => dropdown.style.display = 'none');
+
+          row.append(link, dot, dropdown);
+          list.appendChild(row);
         });
-      } catch (e) {
-        document.getElementById('fileList').innerHTML = '❌ Failed to load files.';
+      } catch {
+        document.getElementById("fileList").innerHTML = '❌ File not load!';
       }
     }
 
-    window.addEventListener('click', (e) => {
-      if (!e.target.classList.contains('action-button')) {
-        document.querySelectorAll('.action-menu').forEach(m => m.style.display = 'none');
-      }
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const status = document.getElementById('status');
+      const progressBar = document.getElementById('progressBar');
+
+      progressBar.style.display = 'block';
+      progressBar.value = 0;
+      status.textContent = 'Uploading...';
+
+      const xhr = new XMLHttpRequest();
+      xhr.upload.onprogress = function(event) {
+        if (event.lengthComputable) {
+          progressBar.value = (event.loaded / event.total) * 100;
+        }
+      };
+      xhr.onload = async function() {
+        if (xhr.status === 200) {
+          const data = JSON.parse(xhr.responseText);
+          if (data.url) {
+            status.textContent = '✅ Uploaded successfully!';
+            progressBar.style.display = 'none';
+            e.target.reset();
+            await loadFiles();
+          } else {
+            status.textContent = '❌ Upload failed!';
+            progressBar.style.display = 'none';
+          }
+        }
+      };
+      xhr.onerror = () => {
+        status.textContent = '❌ Upload error!';
+        progressBar.style.display = 'none';
+      };
+      xhr.open('POST', `${BACKUP_SERVER}/upload`);
+      xhr.send(formData);
     });
 
-    loadFiles();
+    const terminalLines = [
+      "{",
+      '  "name": "MY DRIVE 2.0",',
+      '  "version": "1.0.0",',
+      '  "author": "Likhon Ahmed",',
+      '  "uptime": "1 day 04:23:59"',
+      "}"
+    ];
+
+    const terminal = document.getElementById("terminalOutput");
+    let line = 0, char = 0;
+
+    function typeLine() {
+      if (line < terminalLines.length) {
+        if (char < terminalLines[line].length) {
+          terminal.textContent += terminalLines[line].charAt(char);
+          char++;
+          setTimeout(typeLine, 20);
+        } else {
+          terminal.textContent += "\n";
+          line++;
+          char = 0;
+          setTimeout(typeLine, 150);
+        }
+      }
+    }
+
+    window.addEventListener("load", () => {
+      document.getElementById("homeIntro").style.display = "block";
+      typeLine();
+    });
   </script>
 </body>
 </html>
+<!-- 🔼 HTML শেষ -->
